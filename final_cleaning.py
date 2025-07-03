@@ -1,6 +1,7 @@
 import json
 import re
 import time
+import torch
 
 import pandas as pd
 
@@ -10,10 +11,12 @@ from sentence_transformers import SentenceTransformer, util
 
 
 # encoder
-sentence_encoder = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2').to('cuda' if torch.cuda.is_available() else 'cpu')
+sentence_encoder = SentenceTransformer(
+    'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2').to(
+    'cuda' if torch.cuda.is_available() else 'cpu')
 
 # best dataset (by inspection, they're all statistically similar)
-df = pd.read_pickle(r"C:\Users\CARRK\Documents\Repositories\AI\DataCleaning\matched_data_wo_linebreaks.pickle")
+df = pd.read_pickle("../create_training_data/matched_data_wo_linebreaks.pickle")
 
 
 def clean_text(text):
