@@ -1,15 +1,15 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer, DataCollatorForSeq2Seq
 from peft import LoraConfig, get_peft_model, TaskType
 from datasets import load_dataset, Dataset
+
+# catch misconfigured environment
 import torch
+assert torch.cuda.is_available(), "CUDA GPU not found"
 
-
-# Model and tokenizer
 model_id = "Unbabel/TowerInstruct-7B-v0.1"
 tokenizer = AutoTokenizer.from_pretrained(model_id, use_fast=True)
 model = AutoModelForCausalLM.from_pretrained(model_id, load_in_8bit=True, device_map="auto")
 
-# PEFT / QLoRA config
 lora_config = LoraConfig(
     task_type=TaskType.CAUSAL_LM,
     r=8,
@@ -19,10 +19,10 @@ lora_config = LoraConfig(
 )
 model = get_peft_model(model, lora_config)
 
-# Load your dataset (replace with your own)
-# Format: {"text": "translate English to French: The ocean is blue. <sep> L’océan est bleu."}
-train_data = Dataset.from_json("your_dataset_train.json")
-eval_data = Dataset.from_json("your_dataset_eval.json")
+dataset = Dataset.from_json("training_data.jsonl")
+split = dataset.train_test_split(test_size=0.1, seed=42)
+train_data = split["train"]
+eval_data = split["test"]
 
 def tokenize(batch):
     sep = "<sep>"
@@ -35,7 +35,6 @@ train_data = train_data.map(tokenize)
 eval_data = eval_data.map(tokenize)
 data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
 
-# Training
 training_args = TrainingArguments(
     output_dir="towerinstruct-finetuned-enfr",
     per_device_train_batch_size=4,
@@ -58,4 +57,4 @@ trainer = Trainer(
     data_collator=data_collator
 )
 
-# trainer.train()
+trainer.train()
