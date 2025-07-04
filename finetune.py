@@ -1,15 +1,37 @@
 import torch
 
-from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer, DataCollatorForSeq2Seq
+from transformers import (AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer,
+                          DataCollatorForSeq2Seq, BitsAndBytesConfig)
 from peft import LoraConfig, get_peft_model, TaskType
-from datasets import load_dataset, Dataset
+from datasets import Dataset
 
 # catch misconfigured environment
 assert torch.cuda.is_available(), "CUDA GPU not found"
 
-model_id = "Unbabel/TowerInstruct-7B-v0.1"
+# TODO: this is open weights for research, but we need to contact Unbabel if we want to deploy
+#  approx 55GB storage (probably 2x), 18GB VRAM
+model_id = "Unbabel/TowerInstruct-13B-v0.1"
+
 tokenizer = AutoTokenizer.from_pretrained(model_id, use_fast=True)
-model = AutoModelForCausalLM.from_pretrained(model_id, load_in_8bit=True, device_map="auto")
+tokenizer.pad_token = tokenizer.eos_token
+
+quant_config = BitsAndBytesConfig(
+    load_in_8bit=True,  # or load_in_4bit=True
+    bnb_8bit_use_double_quant=True,
+    bnb_8bit_quant_type="nf4",
+    bnb_8bit_compute_dtype=torch.float16
+)
+
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    quantization_config=quant_config,
+    device_map="auto"
+)
+model.config.pad_token_id = tokenizer.pad_token_id
+
+if "<sep>" not in tokenizer.get_vocab():
+    tokenizer.add_tokens(["<sep>"])
+    model.resize_token_embeddings(len(tokenizer))
 
 lora_config = LoraConfig(
     task_type=TaskType.CAUSAL_LM,
@@ -27,10 +49,29 @@ eval_data = split["test"]
 
 def tokenize(batch):
     sep = "<sep>"
-    inputs = tokenizer(batch["text"].split(sep)[0], truncation=True, padding="max_length", max_length=512)
-    targets = tokenizer(batch["text"].split(sep)[1], truncation=True, padding="max_length", max_length=512)
-    inputs["labels"] = targets["input_ids"]
-    return inputs
+    if sep not in batch["text"]:
+        raise ValueError(f"Separator token '{sep}' not found in: {batch['text']}")
+
+    source, target = batch["text"].split(sep)
+    prompt = source.strip()
+    answer = target.strip()
+
+    full_text = f"{prompt} {sep} {answer}"
+    tokenized = tokenizer(full_text, truncation=True, padding="max_length", max_length=512)
+
+    labels = tokenized["input_ids"].copy()
+    sep_token_id = tokenizer.convert_tokens_to_ids(sep)
+    sep_index = tokenized["input_ids"].index(sep_token_id) if sep_token_id in tokenized["input_ids"] else -1
+
+    if sep_index == -1:
+        raise ValueError("Separator token ID not found in tokenized input")
+
+    tokenized["labels"] = [
+        token if idx > sep_index and token != tokenizer.pad_token_id else -100
+        for idx, token in enumerate(labels)
+    ]
+
+    return tokenized
 
 train_data = train_data.map(tokenize)
 eval_data = eval_data.map(tokenize)
