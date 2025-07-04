@@ -1,9 +1,10 @@
+import torch
+
 from transformers import AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer, DataCollatorForSeq2Seq
 from peft import LoraConfig, get_peft_model, TaskType
 from datasets import load_dataset, Dataset
 
 # catch misconfigured environment
-import torch
 assert torch.cuda.is_available(), "CUDA GPU not found"
 
 model_id = "Unbabel/TowerInstruct-7B-v0.1"

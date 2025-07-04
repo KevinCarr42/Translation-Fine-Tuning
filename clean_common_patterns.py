@@ -6,8 +6,13 @@ import torch
 import pandas as pd
 
 from functools import lru_cache
-from tqdm.notebook import tqdm
 from sentence_transformers import SentenceTransformer, util
+
+
+# ======================================================================
+# NOTE: this wasn't very effective as a final cleaning strategy
+#   it didn't fix most problems (mostly OCR sentence fragment mismatch)
+# ======================================================================
 
 
 # encoder
@@ -94,7 +99,7 @@ def clean_data(dataframe):
     start_time = time.time()
     n_rows = df_out.shape[0]
 
-    for i, row in enumerate(tqdm(df_out.itertuples(index=False), total=len(df_out))):
+    for i, row in enumerate(df_out.itertuples(index=False)):
         new_row = maybe_improve(row)
         before, after = df_out.at[i, 'similarity'], new_row['similarity']
         if before < after and (row.fr != new_row['fr'] or row.en != new_row['en']):
