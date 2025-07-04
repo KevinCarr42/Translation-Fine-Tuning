@@ -2,3 +2,4 @@
 .idea/
 *.pickle
 __pycache__/
+console_output.txt
