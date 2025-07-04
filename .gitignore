@@ -1,3 +1,4 @@
 /training_data.jsonl
 .idea/
 *.pickle
+console_output.txt

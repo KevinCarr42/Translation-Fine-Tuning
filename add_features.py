@@ -11,18 +11,20 @@ def add_features(dataframe):
     t0 = time.perf_counter()
     nlp_fr = spacy.load("fr_core_news_lg")
     nlp_en = spacy.load("en_core_web_lg")
+    nlp_en.disable_pipes("parser")
+    nlp_fr.disable_pipes("parser")
     print(f"→ done in {time.perf_counter() - t0:.2f}s")
     print(f"TOTAL time elapsed so far: {time.perf_counter() - t_total:.2f}s")
 
     print("creating fr nlp pipe")
     t0 = time.perf_counter()
-    docs_fr = list(nlp_fr.pipe(dataframe["fr"].astype(str)))
+    docs_fr = list(nlp_fr.pipe(dataframe["fr"].astype(str), n_process=6, batch_size=1000))
     print(f"→ done in {time.perf_counter() - t0:.2f}s")
     print(f"TOTAL time elapsed so far: {time.perf_counter() - t_total:.2f}s")
 
     print("creating en nlp pipe")
     t0 = time.perf_counter()
-    docs_en = list(nlp_en.pipe(dataframe["en"].astype(str)))
+    docs_en = list(nlp_en.pipe(dataframe["en"].astype(str), n_process=6, batch_size=1000))
     print(f"→ done in {time.perf_counter() - t0:.2f}s")
     print(f"TOTAL time elapsed so far: {time.perf_counter() - t_total:.2f}s")
 
