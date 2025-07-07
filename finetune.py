@@ -5,18 +5,39 @@ from transformers import (AutoTokenizer, AutoModelForCausalLM, TrainingArguments
 from peft import LoraConfig, get_peft_model, TaskType
 from datasets import Dataset
 
+
 # catch misconfigured environment
 assert torch.cuda.is_available(), "CUDA GPU not found"
 
-# TODO: this is open weights for research, but we need to contact Unbabel if we want to deploy
-#  approx 55GB storage (probably 2x), 18GB VRAM
-model_id = "Unbabel/TowerInstruct-13B-v0.1"
 
-tokenizer = AutoTokenizer.from_pretrained(model_id, use_fast=True)
+# MODELS
+#  added comments where lines of code are model specific
+
+# # this is open weights for research, but we need to contact Unbabel if we want to deploy
+# #  approx 55GB storage (probably 2x), 18GB VRAM
+# #  approx costs: $2/document, licencing fee: UNKNOWN
+# #  if this project is successful, consider licensing this model, evaluating other models,
+# model_id = "Unbabel/TowerInstruct-13B-v0.1"
+
+# NOTE:  model_id = "mistralai/Mixtral-8x7B-Instruct"
+#  this is a fully open model
+#  approx 165GB total storage
+#  27GB VRAM (load_in_4bits=True) / 46GB (load_in_8bits=True)
+model_id = "mistralai/Mixtral-8x7B-Instruct"
+
+tokenizer = AutoTokenizer.from_pretrained(
+    model_id,
+    use_fast=True,
+    trust_remote_code=True  # Mixtral
+                            # First run note:
+                            #  watch the log for “Loaded MixtralForCausalLM”
+                            #  if you see “LlamaForCausalLM” instead, the custom code wasn’t trusted.
+)
+
 tokenizer.pad_token = tokenizer.eos_token
 
 quant_config = BitsAndBytesConfig(
-    load_in_8bit=True,  # or load_in_4bit=True
+    load_in_4bit=True,
     bnb_8bit_use_double_quant=True,
     bnb_8bit_quant_type="nf4",
     bnb_8bit_compute_dtype=torch.float16
@@ -25,7 +46,8 @@ quant_config = BitsAndBytesConfig(
 model = AutoModelForCausalLM.from_pretrained(
     model_id,
     quantization_config=quant_config,
-    device_map="auto"
+    device_map="auto",
+    trust_remote_code=True  # Mixtral
 )
 model.config.pad_token_id = tokenizer.pad_token_id
 
@@ -38,6 +60,7 @@ lora_config = LoraConfig(
     r=8,
     lora_alpha=32,
     lora_dropout=0.05,
+    target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],  # Mixtral
     inference_mode=False
 )
 model = get_peft_model(model, lora_config)
@@ -57,7 +80,7 @@ def tokenize(batch):
     answer = target.strip()
 
     full_text = f"{prompt} {sep} {answer}"
-    tokenized = tokenizer(full_text, truncation=True, padding="max_length", max_length=512)
+    tokenized = tokenizer(full_text, truncation=True, padding="longest", max_length=512)
 
     labels = tokenized["input_ids"].copy()
     sep_token_id = tokenizer.convert_tokens_to_ids(sep)
@@ -77,8 +100,18 @@ train_data = train_data.map(tokenize)
 eval_data = eval_data.map(tokenize)
 data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
 
+def compute_metrics(eval_pred):
+    preds, labels = eval_pred
+    preds = np.where(preds != -100, preds, tokenizer.pad_token_id)
+    labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
+    preds_text = tokenizer.batch_decode(preds, skip_special_tokens=True)
+    labels_text = tokenizer.batch_decode(labels, skip_special_tokens=True)
+    bleu = sacrebleu.corpus_bleu(preds_text, [labels_text]).score
+    return {"bleu": bleu}
+
 training_args = TrainingArguments(
-    output_dir="towerinstruct-finetuned-enfr",
+    # output_dir="towerinstruct-finetuned-enfr",  # TowerInstruct
+    output_dir="mixtral-finetuned-enfr",  # Mixtral
     per_device_train_batch_size=4,
     gradient_accumulation_steps=8,
     num_train_epochs=3,
@@ -96,7 +129,9 @@ trainer = Trainer(
     train_dataset=train_data,
     eval_dataset=eval_data,
     tokenizer=tokenizer,
-    data_collator=data_collator
+    data_collator=data_collator,
+    compute_metrics=compute_metrics
 )
 
 trainer.train()
+trainer.save_model()
