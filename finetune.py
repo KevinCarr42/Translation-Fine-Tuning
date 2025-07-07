@@ -1,22 +1,22 @@
-import torch
+import os, torch, argparse
 
+import numpy as np
+import sacrebleu
 from datasets import Dataset
 from peft import LoraConfig, get_peft_model, TaskType, prepare_model_for_kbit_training
 from transformers import (AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer,
                           DataCollatorForSeq2Seq, BitsAndBytesConfig)
 
 
-# catch misconfigured environment
-assert torch.cuda.is_available(), "CUDA GPU not found"
-
 model_id = "mistralai/Mixtral-8x7B-Instruct-v0.1"
-#  this is a fully open model
+#  NOTES: this is a fully open model
 #    approx 165GB total storage
 #    27GB VRAM (load_in_4bits=True) / 46GB (load_in_8bits=True)
 
 tokenizer = AutoTokenizer.from_pretrained(
     model_id,
     use_fast=True,
+    max_length=256,
     trust_remote_code=True  # First run note:
                             #  watch the log for “Loaded MixtralForCausalLM”
                             #  if you see “LlamaForCausalLM” instead, the custom code wasn’t trusted.
@@ -24,33 +24,59 @@ tokenizer = AutoTokenizer.from_pretrained(
 
 tokenizer.pad_token = tokenizer.eos_token
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--model_path", default=None)
+args = parser.parse_args()
+
 quant_config = BitsAndBytesConfig(
     load_in_4bit=True,
-    bnb_8bit_use_double_quant=True,
-    bnb_8bit_quant_type="nf4",
-    bnb_8bit_compute_dtype=torch.float16,
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype=torch.float16,
 )
 
 sep_token = "<sep>"
 if sep_token not in tokenizer.get_vocab():
     tokenizer.add_tokens([sep_token])
 
-max_memory = {0: "30GiB", 1: "30GiB", "cpu": "64GiB"}  # 2 GB head-room
+# ----------------- phase 1: quantise once -----------------
+if args.model_path is None:
+    max_mem = {0: "29GiB", 1: "29GiB", "cpu": "32GiB"}
 
+    model = AutoModelForCausalLM.from_pretrained(
+        model_id,
+        torch_dtype=torch.float16,
+        device_map="auto",
+        max_memory=max_mem,
+        trust_remote_code=True,
+        load_in_4bit=True,
+        bnb_4bit_use_double_quant=True,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_compute_dtype=torch.float16,
+        low_cpu_mem_usage=True,
+    )
+
+    os.makedirs(".tmp_quant", exist_ok=True)
+    model.save_pretrained(".tmp_quant")
+    tokenizer.save_pretrained(".tmp_quant")
+
+    print("Quantised weights saved. Now launch 2-GPU training:")
+    print("torchrun --standalone --nproc_per_node=2 finetune.py --model_path .tmp_quant")
+    exit()
+
+# ----------------- phase 2: training (with torchrun --nproc_per_node=2) ---------
 model = AutoModelForCausalLM.from_pretrained(
-    model_id,
-    quantization_config=quant_config,
-    device_map="auto",  # remove this line if using torchrun --nproc_per_node=2 (torchrun keeps getting vram errors)
-    max_memory=max_memory,
+    args.model_path,
+    # attn_implementation="flash_attention_2",  # trouble getting this installed
+    device_map={"": f"cuda:{int(os.environ.get('LOCAL_RANK', 0))}"},
     trust_remote_code=True,
 )
-
-model.config.pad_token_id = tokenizer.pad_token_id
+tokenizer = AutoTokenizer.from_pretrained(args.model_path, use_fast=True)
 
 if len(tokenizer) > model.config.vocab_size:
     model.resize_token_embeddings(len(tokenizer), mean_resizing=False)
 
-model = prepare_model_for_kbit_training(model, quant_config)
+# model.gradient_checkpointing_disable()
 
 lora_config = LoraConfig(
     task_type=TaskType.CAUSAL_LM,
@@ -107,9 +133,9 @@ def compute_metrics(eval_pred):
     return {"bleu": bleu}
 
 training_args = TrainingArguments(
-    output_dir="mixtral-finetuned-enfr",  # Mixtral
-    per_device_train_batch_size=4,
-    gradient_accumulation_steps=4,
+    output_dir="mixtral-finetuned-enfr",
+    per_device_train_batch_size=1,
+    gradient_accumulation_steps=16,
     num_train_epochs=1,
     bf16=True,
     eval_strategy="epoch",
