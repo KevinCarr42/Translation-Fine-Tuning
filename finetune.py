@@ -1,9 +1,9 @@
 import torch
 
+from datasets import Dataset
+from peft import LoraConfig, get_peft_model, TaskType, prepare_model_for_kbit_training
 from transformers import (AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer,
                           DataCollatorForSeq2Seq, BitsAndBytesConfig)
-from peft import LoraConfig, get_peft_model, TaskType
-from datasets import Dataset
 
 
 # catch misconfigured environment
@@ -31,17 +31,26 @@ quant_config = BitsAndBytesConfig(
     bnb_8bit_compute_dtype=torch.float16,
 )
 
+sep_token = "<sep>"
+if sep_token not in tokenizer.get_vocab():
+    tokenizer.add_tokens([sep_token])
+
+max_memory = {0: "30GiB", 1: "30GiB", "cpu": "64GiB"}  # 2 GB head-room
+
 model = AutoModelForCausalLM.from_pretrained(
     model_id,
     quantization_config=quant_config,
-    device_map="auto",
+    device_map="auto",  # remove this line if using torchrun --nproc_per_node=2 (torchrun keeps getting vram errors)
+    max_memory=max_memory,
     trust_remote_code=True,
 )
+
 model.config.pad_token_id = tokenizer.pad_token_id
 
-if "<sep>" not in tokenizer.get_vocab():
-    tokenizer.add_tokens(["<sep>"])
-    model.resize_token_embeddings(len(tokenizer))
+if len(tokenizer) > model.config.vocab_size:
+    model.resize_token_embeddings(len(tokenizer), mean_resizing=False)
+
+model = prepare_model_for_kbit_training(model, quant_config)
 
 lora_config = LoraConfig(
     task_type=TaskType.CAUSAL_LM,
@@ -119,7 +128,6 @@ trainer = Trainer(
     tokenizer=tokenizer,
     data_collator=data_collator,
     compute_metrics=compute_metrics,
-    label_names=["labels"],
 )
 
 trainer.train()
