@@ -1,7 +1,9 @@
+import numpy as np
 import torch
 
 from datasets import Dataset
 from peft import LoraConfig, get_peft_model, TaskType, prepare_model_for_kbit_training
+from sacrebleu import sacrebleu
 from transformers import (AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer,
                           DataCollatorForSeq2Seq, BitsAndBytesConfig)
 
@@ -107,7 +109,7 @@ def compute_metrics(eval_pred):
     return {"bleu": bleu}
 
 training_args = TrainingArguments(
-    output_dir="mixtral-finetuned-enfr",  # Mixtral
+    output_dir="mixtral-finetuned-enfr",
     per_device_train_batch_size=4,
     gradient_accumulation_steps=4,
     num_train_epochs=1,
