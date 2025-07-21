@@ -26,10 +26,6 @@ quant_config = BitsAndBytesConfig(
     bnb_8bit_compute_dtype=torch.float16,
 )
 
-sep_token = "<sep>"
-if sep_token not in tokenizer.get_vocab():
-    tokenizer.add_tokens([sep_token])
-
 max_memory = {0: "30GiB", 1: "30GiB", "cpu": "64GiB"}
 
 model = AutoModelForCausalLM.from_pretrained(

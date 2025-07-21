@@ -20,8 +20,6 @@ def load_tokenizer():
     if _tokenizer is None:
         _tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_ID, use_fast=True)
         _tokenizer.pad_token = _tokenizer.eos_token
-        if "<sep>" not in _tokenizer.get_vocab():
-            _tokenizer.add_tokens(["<sep>"])
     return _tokenizer
 
 
