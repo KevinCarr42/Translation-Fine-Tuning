@@ -3,25 +3,18 @@ import torch
 
 from datasets import Dataset
 from peft import LoraConfig, get_peft_model, TaskType, prepare_model_for_kbit_training
-from sacrebleu import sacrebleu
 from transformers import (AutoTokenizer, AutoModelForCausalLM, TrainingArguments, Trainer,
                           DataCollatorForSeq2Seq, BitsAndBytesConfig)
-
 
 # catch misconfigured environment
 assert torch.cuda.is_available(), "CUDA GPU not found"
 
 model_id = "mistralai/Mixtral-8x7B-Instruct-v0.1"
-#  this is a fully open model
-#    approx 165GB total storage
-#    27GB VRAM (load_in_4bits=True) / 46GB (load_in_8bits=True)
 
 tokenizer = AutoTokenizer.from_pretrained(
     model_id,
     use_fast=True,
-    trust_remote_code=True  # First run note:
-                            #  watch the log for “Loaded MixtralForCausalLM”
-                            #  if you see “LlamaForCausalLM” instead, the custom code wasn’t trusted.
+    trust_remote_code=True
 )
 
 tokenizer.pad_token = tokenizer.eos_token
@@ -37,12 +30,12 @@ sep_token = "<sep>"
 if sep_token not in tokenizer.get_vocab():
     tokenizer.add_tokens([sep_token])
 
-max_memory = {0: "30GiB", 1: "30GiB", "cpu": "64GiB"}  # 2 GB head-room
+max_memory = {0: "30GiB", 1: "30GiB", "cpu": "64GiB"}
 
 model = AutoModelForCausalLM.from_pretrained(
     model_id,
     quantization_config=quant_config,
-    device_map="auto",  # remove this line if using torchrun --nproc_per_node=2 (torchrun keeps getting vram errors)
+    device_map="auto",
     max_memory=max_memory,
     trust_remote_code=True,
 )
@@ -69,44 +62,48 @@ split = dataset.train_test_split(test_size=0.1, seed=42)
 train_data = split["train"]
 eval_data = split["test"]
 
+
+def build_prompt(source_text, target_text, source_lang="en"):
+    if source_lang.lower().startswith("en"):
+        instruction = "Translate the following English text to French. Output only the French translation, nothing else."
+        prompt = f"[INST] {instruction}\n\nEnglish: {source_text}\n\nFrench: [/INST]"
+    else:
+        instruction = "Traduisez le texte français suivant en anglais. Ne donnez que la traduction anglaise, rien d'autre."
+        prompt = f"[INST] {instruction}\n\nFrançais: {source_text}\n\nAnglais: [/INST]"
+
+    # For training, we append the target after the prompt
+    full_text = f"{prompt} {target_text}"
+
+    return prompt, full_text
+
+
 def tokenize(batch):
-    sep = "<sep>"
-    if sep not in batch["text"]:
-        raise ValueError(f"Separator token '{sep}' not found in: {batch['text']}")
+    source_text = batch.get("source", "")
+    target_text = batch.get("target", "")
+    source_lang = batch.get("source_lang", "en")
 
-    source, target = batch["text"].split(sep)
-    prompt = source.strip()
-    answer = target.strip()
-
-    full_text = f"{prompt} {sep} {answer}"
-    tokenized = tokenizer(full_text, truncation=True, padding="longest", max_length=512)
+    prompt, full_text = build_prompt(source_text, target_text, source_lang)
+    tokenized = tokenizer(full_text, truncation=True, padding="max_length", max_length=512)
+    prompt_tokens = tokenizer(prompt, truncation=True, max_length=512)["input_ids"]
+    prompt_length = len(prompt_tokens)
 
     labels = tokenized["input_ids"].copy()
-    sep_token_id = tokenizer.convert_tokens_to_ids(sep)
-    sep_index = tokenized["input_ids"].index(sep_token_id) if sep_token_id in tokenized["input_ids"] else -1
+    # Set prompt tokens to -100 so they're ignored in loss calculation
+    for i in range(prompt_length):
+        labels[i] = -100
 
-    if sep_index == -1:
-        raise ValueError("Separator token ID not found in tokenized input")
+    # Also set padding tokens to -100
+    labels = [token if token != tokenizer.pad_token_id else -100 for token in labels]
 
-    tokenized["labels"] = [
-        token if idx > sep_index and token != tokenizer.pad_token_id else -100
-        for idx, token in enumerate(labels)
-    ]
+    tokenized["labels"] = labels
 
     return tokenized
+
 
 train_data = train_data.map(tokenize)
 eval_data = eval_data.map(tokenize)
 data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
 
-def compute_metrics(eval_pred):
-    preds, labels = eval_pred
-    preds = np.where(preds != -100, preds, tokenizer.pad_token_id)
-    labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
-    preds_text = tokenizer.batch_decode(preds, skip_special_tokens=True)
-    labels_text = tokenizer.batch_decode(labels, skip_special_tokens=True)
-    bleu = sacrebleu.corpus_bleu(preds_text, [labels_text]).score
-    return {"bleu": bleu}
 
 training_args = TrainingArguments(
     output_dir="mixtral-finetuned-enfr",
@@ -120,6 +117,9 @@ training_args = TrainingArguments(
     logging_steps=20,
     report_to="none",
     optim="paged_adamw_8bit",
+    eval_accumulation_steps=1,
+    eval_do_concat_batches=False,
+    per_device_eval_batch_size=1,
 )
 
 trainer = Trainer(
@@ -129,8 +129,11 @@ trainer = Trainer(
     eval_dataset=eval_data,
     tokenizer=tokenizer,
     data_collator=data_collator,
-    compute_metrics=compute_metrics,
 )
 
 trainer.train()
+
 trainer.save_model()
+tokenizer.save_pretrained(trainer.args.output_dir)
+
+trainer.save_state()

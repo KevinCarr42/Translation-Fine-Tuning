@@ -4,7 +4,6 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
 from transformers import BitsAndBytesConfig
 
-
 BASE_MODEL_ID = "mistralai/Mixtral-8x7B-Instruct-v0.1"
 LORA_PATH = "mixtral-finetuned-enfr/checkpoint-48604"
 DEVICE_MAP = "auto"
@@ -13,11 +12,10 @@ DTYPE = torch.float16
 _tokenizer = None
 _base_model = None
 _finetuned_model = None
-
 DEBUG = False
 
 
-def _load_tokenizer():
+def load_tokenizer():
     global _tokenizer
     if _tokenizer is None:
         _tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_ID, use_fast=True)
@@ -27,7 +25,7 @@ def _load_tokenizer():
     return _tokenizer
 
 
-def _load_base_model():
+def load_base_model():
     global _base_model
     if _base_model is None:
         quant_cfg = BitsAndBytesConfig(
@@ -43,53 +41,96 @@ def _load_base_model():
             trust_remote_code=True,
             local_files_only=True,
         )
-        tokenizer = _load_tokenizer()
+        tokenizer = load_tokenizer()
         if len(tokenizer) > _base_model.config.vocab_size:
             _base_model.resize_token_embeddings(len(tokenizer), mean_resizing=False)
     return _base_model
 
 
-def _load_finetuned_model():
+def load_finetuned_model():
     global _finetuned_model
     if _finetuned_model is None:
-        tokenizer = _load_tokenizer()
-        base = _load_base_model()
-
+        tokenizer = load_tokenizer()
+        base = load_base_model()
         if len(tokenizer) > base.config.vocab_size:
             base.resize_token_embeddings(len(tokenizer), mean_resizing=False)
-
         _finetuned_model = PeftModel.from_pretrained(base, LORA_PATH)
     return _finetuned_model
 
 
-def _build_prompt(text, src_lang):
-    sep = "<sep>"
+def build_prompt(text, src_lang):
     if src_lang.lower().startswith("en"):
-        return f"Translate to French: {sep} {text}"
-    return f"Traduire en anglais : {sep} {text}"
+        instruction = "Translate the following English text to French. Output only the French translation, nothing else."
+        prompt = f"[INST] {instruction}\n\nEnglish: {text}\n\nFrench: [/INST]"
+    else:
+        instruction = "Traduisez le texte français suivant en anglais. Ne donnez que la traduction anglaise, rien d'autre."
+        prompt = f"[INST] {instruction}\n\nFrançais: {text}\n\nAnglais: [/INST]"
+
+    return prompt
 
 
 @torch.inference_mode()
 def translate_text(input_text, input_language="en", finetuned=True):
-    tokenizer = _load_tokenizer()
-    model = _load_finetuned_model() if finetuned else _load_base_model()
-    prompt = _build_prompt(input_text, input_language)
+    tokenizer = load_tokenizer()
+    model = load_finetuned_model() if finetuned else load_base_model()
+
+    prompt = build_prompt(input_text, input_language)
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+
+    stop_token_ids = [
+        tokenizer.eos_token_id,
+        tokenizer.convert_tokens_to_ids("."),
+        tokenizer.convert_tokens_to_ids("\n"),
+    ]
+
     output_ids = model.generate(
         **inputs,
         max_new_tokens=128,
+        min_new_tokens=5,
         do_sample=False,
         num_beams=4,
-        eos_token_id=tokenizer.eos_token_id,
+        repetition_penalty=1.2,
+        early_stopping=True,
+        eos_token_id=stop_token_ids,  # Multiple stop tokens
         pad_token_id=tokenizer.pad_token_id,
+        no_repeat_ngram_size=3,  # Prevent 3-gram repetitions
     )[0]
+
     generated = tokenizer.decode(output_ids, skip_special_tokens=True)
 
     if DEBUG:
-        print(f'\tinput text: {input_text}')
-        print(f'\t\tinput lang: {input_language}')
-        print(f'\t\t\tgenerated {generated}')
+        print(f'Input text: {input_text}')
+        print(f'Input language: {input_language}')
+        print(f'Full generated: {generated}')
 
-    if "<sep>" in generated:
-        return generated.split("<sep>", 1)[1].strip()
-    return generated.strip()
+    # Extract only the translation part (after [/INST])
+    if "[/INST]" in generated:
+        translation = generated.split("[/INST]", 1)[1].strip()
+    else:
+        # Fallback if format is different
+        translation = generated.replace(prompt, "").strip()
+
+    # Clean up any remaining artifacts
+    translation = translation.split("\n")[0].strip()  # Take only first line
+
+    return translation
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Translation tool")
+    parser.add_argument("text", help="Text to translate")
+    parser.add_argument("--lang", default="en", help="Source language (en or fr)")
+    parser.add_argument("--base", action="store_true", help="Use base model instead of finetuned")
+    parser.add_argument("--debug", action="store_true", help="Enable debug output")
+
+    args = parser.parse_args()
+
+    global DEBUG
+    DEBUG = args.debug
+
+    translation = translate_text(args.text, args.lang, not args.base)
+    print(translation)
+
+
+if __name__ == "__main__":
+    main()
