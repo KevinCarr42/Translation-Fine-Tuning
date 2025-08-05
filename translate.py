@@ -5,7 +5,7 @@ from peft import PeftModel
 from transformers import BitsAndBytesConfig
 
 BASE_MODEL_ID = "mistralai/Mixtral-8x7B-Instruct-v0.1"
-LORA_PATH = "mixtral-finetuned-enfr/checkpoint-48604"
+LORA_PATH = "mixtral-finetuned-enfr/checkpoint-30499"
 DEVICE_MAP = "auto"
 DTYPE = torch.float16
 
@@ -38,6 +38,7 @@ def load_base_model():
             device_map=DEVICE_MAP,
             trust_remote_code=True,
             local_files_only=True,
+            revision="41bd4c9e7e4fb318ca40e721131d4933966c2cc1",  # not sure why this needs to be explicit
         )
         tokenizer = load_tokenizer()
         if len(tokenizer) > _base_model.config.vocab_size:
