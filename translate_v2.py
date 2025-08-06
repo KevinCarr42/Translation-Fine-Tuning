@@ -111,6 +111,8 @@ class BaseTranslationModel:
 
 
 class NLLBTranslationModel(BaseTranslationModel):
+    # NOTE: research only license for this model
+
     LANGUAGE_CODES = {"en": "eng_Latn", "fr": "fra_Latn"}
 
     def translate_text(
@@ -204,6 +206,71 @@ class OpusTranslationModel(BaseTranslationModel):
             "num_beams": 4,
             "do_sample": False,
             "pad_token_id": tokenizer.pad_token_id,
+        }
+        if generation_kwargs:
+            generation_arguments.update(generation_kwargs)
+
+        output_token_ids = model.generate(**model_inputs, **generation_arguments)
+        text_output = tokenizer.batch_decode(output_token_ids, skip_special_tokens=True)[0].strip()
+        return self.clean_output(text_output)
+
+
+class M2M100TranslationModel(BaseTranslationModel):
+    LANGUAGE_CODES = {"en": "en", "fr": "fr"}
+
+    def translate_text(self, input_text, input_language="en", target_language="fr",
+                       use_finetuned=False, generation_kwargs=None):
+        tokenizer = self.load_tokenizer()  # AutoTokenizer -> M2M100Tokenizer
+        model = self.load_model()          # AutoModelForSeq2SeqLM -> M2M100ForConditionalGeneration
+
+        source_code = self.LANGUAGE_CODES[input_language]
+        target_code = self.LANGUAGE_CODES[target_language]
+        tokenizer.src_lang = source_code
+
+        model_inputs = tokenizer(input_text, return_tensors="pt", padding=True)
+        model_inputs = {k: (v.to(model.device) if hasattr(v, "to") else v) for k, v in model_inputs.items()}
+
+        generation_arguments = {
+            "max_new_tokens": 256,
+            "num_beams": 4,
+            "do_sample": False,
+            "pad_token_id": tokenizer.pad_token_id,
+            "forced_bos_token_id": tokenizer.get_lang_id(target_code),
+        }
+        if generation_kwargs:
+            generation_arguments.update(generation_kwargs)
+
+        output_token_ids = model.generate(**model_inputs, **generation_arguments)
+        text_output = tokenizer.batch_decode(output_token_ids, skip_special_tokens=True)[0].strip()
+        return self.clean_output(text_output)
+
+
+class MBART50TranslationModel(BaseTranslationModel):
+    LANGUAGE_CODES = {"en": "en_XX", "fr": "fr_XX"}
+
+    def translate_text(self, input_text, input_language="en", target_language="fr",
+                       use_finetuned=False, generation_kwargs=None):
+        tokenizer = self.load_tokenizer()  # AutoTokenizer -> MBart50TokenizerFast
+        model = self.load_model()          # AutoModelForSeq2SeqLM -> MBartForConditionalGeneration
+
+        source_code = self.LANGUAGE_CODES[input_language]
+        target_code = self.LANGUAGE_CODES[target_language]
+        tokenizer.src_lang = source_code
+
+        model_inputs = tokenizer(input_text, return_tensors="pt", padding=True)
+        model_inputs = {k: (v.to(model.device) if hasattr(v, "to") else v) for k, v in model_inputs.items()}
+
+        # Prefer lang_code_to_id when present; fall back to convert_tokens_to_ids
+        target_id = getattr(tokenizer, "lang_code_to_id", {}).get(target_code) if hasattr(tokenizer, "lang_code_to_id") else None
+        if target_id is None:
+            target_id = tokenizer.convert_tokens_to_ids(target_code)
+
+        generation_arguments = {
+            "max_new_tokens": 256,
+            "num_beams": 4,
+            "do_sample": False,
+            "pad_token_id": tokenizer.pad_token_id,
+            "forced_bos_token_id": target_id,
         }
         if generation_kwargs:
             generation_arguments.update(generation_kwargs)

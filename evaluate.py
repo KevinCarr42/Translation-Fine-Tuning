@@ -2,7 +2,8 @@ import random
 from datetime import datetime
 import json
 from translate import translate_text
-from translate_v2 import create_translator, NLLBTranslationModel, OpusTranslationModel
+from translate_v2 import (create_translator, NLLBTranslationModel, OpusTranslationModel,
+                          M2M100TranslationModel, MBART50TranslationModel)
 
 
 language_codes = {
@@ -46,7 +47,7 @@ def compare_finetuning(n=10, run_name="compare_finetuning"):
 
 def test_translations(dict_of_models, n_samples=10, source_lang=None, debug=False):
     ts = datetime.now().strftime("%Y%m%d-%H%M")
-    INDENT = 50
+    INDENT = 60
     out_path = f"translation_comparison_{ts}.txt"
     all_models = dict_of_models.copy()
 
@@ -92,7 +93,7 @@ def test_translations(dict_of_models, n_samples=10, source_lang=None, debug=Fals
 
 if __name__ == "__main__":
     all_models = {
-        "nllb_3b": {
+        "nllb_3b_researchonly": {
             "cls": NLLBTranslationModel,
             "base_model_id": "facebook/nllb-200-3.3B",
             "model_type": "seq2seq",
@@ -102,6 +103,17 @@ if __name__ == "__main__":
             "base_model_id": "Helsinki-NLP/opus-mt-tc-big-en-fr",  # fr->en auto-swap
             "model_type": "seq2seq",
         },
+        "m2m100_418m": {
+            "cls": M2M100TranslationModel,
+            "base_model_id": "facebook/m2m100_418M",
+            "model_type": "seq2seq",
+        },
+        "mbart50_mmt": {
+            "cls": MBART50TranslationModel,
+            "base_model_id": "facebook/mbart-large-50-many-to-many-mmt",
+            "model_type": "seq2seq",
+        },
+        # consider also testing https://huggingface.co/google/madlad400-3b-mt (requires prefixing with `<2fr>` or `<2en>`)
     }
 
     test_translations(all_models, n_samples=100, source_lang="fr")
