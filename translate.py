@@ -1,4 +1,3 @@
-import argparse
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel
@@ -113,23 +112,3 @@ def translate_text(input_text, input_language="en", finetuned=True):
     translation = translation.split("\n")[0].strip()  # Take only first line
 
     return translation
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Translation tool")
-    parser.add_argument("text", help="Text to translate")
-    parser.add_argument("--lang", default="en", help="Source language (en or fr)")
-    parser.add_argument("--base", action="store_true", help="Use base model instead of finetuned")
-    parser.add_argument("--debug", action="store_true", help="Enable debug output")
-
-    args = parser.parse_args()
-
-    global DEBUG
-    DEBUG = args.debug
-
-    translation = translate_text(args.text, args.lang, not args.base)
-    print(translation)
-
-
-if __name__ == "__main__":
-    main()
