@@ -4,7 +4,6 @@ from peft import PeftModel
 from transformers import BitsAndBytesConfig
 import logging
 
-
 DEFAULT_CONFIG = {
     "base_model_id": "facebook/nllb-200-3.3B",
     "lora_path": None,
@@ -32,10 +31,19 @@ class TranslationModel:
 
     def load_tokenizer(self):
         if self._tokenizer is None:
+            tokenizer_kwargs = {
+                "use_fast": True,
+                "local_files_only": self.config["local_files_only"]
+            }
+
+            # For T5/mT5 models, explicitly set legacy=True to avoid warning
+            if "t5" in self.config["base_model_id"].lower():
+                tokenizer_kwargs["legacy"] = True
+                tokenizer_kwargs["use_fast"] = False  # Use slow tokenizer for T5 to avoid byte fallback warning
+
             self._tokenizer = AutoTokenizer.from_pretrained(
                 self.config["base_model_id"],
-                use_fast=True,
-                local_files_only=self.config["local_files_only"]
+                **tokenizer_kwargs
             )
             if hasattr(self._tokenizer, 'pad_token') and self._tokenizer.pad_token is None:
                 self._tokenizer.pad_token = self._tokenizer.eos_token
@@ -44,13 +52,17 @@ class TranslationModel:
     def load_base_model(self):
         if self._base_model is None:
             model_kwargs = {
-                "device_map": self.config["device_map"],
                 "trust_remote_code": True,
                 "local_files_only": self.config["local_files_only"],
                 "torch_dtype": self.config["dtype"]
             }
 
-            if self.config["max_memory"]:
+            # MarianMT models don't support device_map='auto'
+            if "opus" not in self.config["base_model_id"].lower() and "helsinki" not in self.config[
+                "base_model_id"].lower():
+                model_kwargs["device_map"] = self.config["device_map"]
+
+            if self.config["max_memory"] and "device_map" in model_kwargs:
                 model_kwargs["max_memory"] = self.config["max_memory"]
 
             if self.config["use_quantization"]:
@@ -74,6 +86,11 @@ class TranslationModel:
                     self.config["base_model_id"], **model_kwargs
                 )
 
+            # Move OPUS models to CUDA if available
+            if ("opus" in self.config["base_model_id"].lower() or "helsinki" in self.config["base_model_id"].lower()):
+                if torch.cuda.is_available():
+                    self._base_model = self._base_model.cuda()
+
             tokenizer = self.load_tokenizer()
             if hasattr(self._base_model.config, 'vocab_size') and len(tokenizer) > self._base_model.config.vocab_size:
                 self._base_model.resize_token_embeddings(len(tokenizer), mean_resizing=False)
@@ -94,14 +111,58 @@ class TranslationModel:
         tokenizer = self.load_tokenizer()
 
         if "nllb" in self.config["base_model_id"].lower():
+            # NLLB language codes
             src_code = "eng_Latn" if src_lang.lower().startswith("en") else "fra_Latn"
             tgt_code = "fra_Latn" if src_lang.lower().startswith("en") else "eng_Latn"
 
+            # Set source language for tokenization
             tokenizer.src_lang = src_code
+
+            # Tokenize the input text
             inputs = tokenizer(text, return_tensors="pt", padding=True)
-            inputs["forced_bos_token_id"] = tokenizer.lang_code_to_id[tgt_code]
+
+            # For NLLB, we need to set the forced_bos_token_id to the target language token
+            # The tokenizer converts language codes to token IDs automatically
+            tgt_lang_token = tokenizer.convert_tokens_to_ids(tgt_code)
+
+            # If the above doesn't work, try getting it from the tokenizer's vocabulary
+            if tgt_lang_token == tokenizer.unk_token_id or tgt_lang_token is None:
+                # Alternative: try to get it from the tokenizer's special tokens
+                if hasattr(tokenizer, '_additional_special_tokens'):
+                    for token in tokenizer._additional_special_tokens:
+                        if token == tgt_code:
+                            tgt_lang_token = tokenizer.convert_tokens_to_ids(token)
+                            break
+
+            # Set the forced BOS token ID for generation
+            if tgt_lang_token and tgt_lang_token != tokenizer.unk_token_id:
+                inputs["forced_bos_token_id"] = tgt_lang_token
+            else:
+                # Fallback: try to encode the language code directly
+                tgt_tokens = tokenizer.encode(tgt_code, add_special_tokens=False)
+                if tgt_tokens:
+                    inputs["forced_bos_token_id"] = tgt_tokens[0]
+                else:
+                    self.logger.warning(f"Could not find token ID for target language: {tgt_code}")
+
             return inputs
+        elif "mt5" in self.config["base_model_id"].lower() or "t5" in self.config["base_model_id"].lower():
+            # mT5 models use task prefixes
+            if src_lang.lower().startswith("en") and tgt_lang.lower().startswith("fr"):
+                prefix = "translate English to French: "
+            elif src_lang.lower().startswith("fr") and tgt_lang.lower().startswith("en"):
+                prefix = "translate French to English: "
+            else:
+                # Generic translation prefix
+                prefix = f"translate to {tgt_lang}: "
+
+            full_text = prefix + text
+            return tokenizer(full_text, return_tensors="pt", padding=True, max_length=512, truncation=True)
+        elif "opus" in self.config["base_model_id"].lower():
+            # OPUS-MT models typically don't need special formatting
+            return tokenizer(text, return_tensors="pt", padding=True)
         else:
+            # Default case for other models
             return tokenizer(text, return_tensors="pt", padding=True)
 
     def build_causal_prompt(self, text, src_lang) -> str:
@@ -132,13 +193,31 @@ class TranslationModel:
                 "max_new_tokens": 512,
                 "min_new_tokens": 5,
                 "num_beams": 4,
-                "temperature": 0.1,
-                "top_p": 0.8,
+                "do_sample": False,
                 "repetition_penalty": 1.1,
                 "early_stopping": True,
                 "pad_token_id": tokenizer.pad_token_id,
                 "no_repeat_ngram_size": 3,
             }
+
+            # mT5 models need special handling to avoid extra_id tokens
+            if "mt5" in self.config["base_model_id"].lower() or "t5" in self.config["base_model_id"].lower():
+                # For mT5, we need to set the decoder_start_token_id to 0 (pad token)
+                default_gen_kwargs["decoder_start_token_id"] = 0
+                default_gen_kwargs["eos_token_id"] = tokenizer.eos_token_id
+                # Use higher repetition penalty to avoid repeating extra_id tokens
+                default_gen_kwargs["repetition_penalty"] = 2.5
+                default_gen_kwargs["length_penalty"] = 1.0
+                # Suppress extra_id tokens during generation
+                if hasattr(tokenizer, 'additional_special_tokens'):
+                    suppress_tokens = []
+                    for token in tokenizer.additional_special_tokens:
+                        if 'extra_id' in token:
+                            token_id = tokenizer.convert_tokens_to_ids(token)
+                            if token_id is not None:
+                                suppress_tokens.append(token_id)
+                    if suppress_tokens:
+                        default_gen_kwargs["suppress_tokens"] = suppress_tokens
         else:
             prompt = self.build_causal_prompt(input_text, input_language)
             inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
@@ -223,5 +302,3 @@ def create_translator(base_model_id: str, lora_path=None,
         **kwargs
     }
     return TranslationModel(config)
-
-
