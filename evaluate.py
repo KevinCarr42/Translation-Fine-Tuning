@@ -1,10 +1,11 @@
 import random
 from datetime import datetime
 import json
-from translate import translate_text
-from translate_v2 import (create_translator, NLLBTranslationModel, OpusTranslationModel,
-                          M2M100TranslationModel, MBART50TranslationModel)
-
+import csv
+from sentence_transformers import SentenceTransformer
+from sentence_transformers.util import pytorch_cos_sim
+from translate import (create_translator, NLLBTranslationModel, OpusTranslationModel,
+                       M2M100TranslationModel, MBART50TranslationModel)
 
 language_codes = {
     "en": "English",
@@ -19,38 +20,15 @@ def sample_jsonl(path, n_samples=10, source_lang=None):
     return random.sample(data, min(n_samples, len(data)))
 
 
-def compare_finetuning(n=10, run_name="compare_finetuning"):
-    ts = datetime.now().strftime("%Y%m%d-%H%M%S")
-    out_path = f"{run_name}_{ts}.txt"
-    with open(out_path, "w", encoding="utf-8") as f:
-        for i, d in enumerate(sample_jsonl("training_data.jsonl", n), start=1):
-            source = d.get("source")
-            target = d.get("target")
-            source_lang = d.get("source_lang")
-            translated_base_model = translate_text(source, source_lang, False)
-            translated_finetuned = translate_text(source, source_lang, True)
-
-            chunk = (
-                f"\n[{i}/{n}] {source_lang}\ttext in\n"
-                f"\t{source}\n"
-                f"text out (expected)\n"
-                f"\t{target}\n"
-                f"text out (predicted with base model)\n"
-                f"\t{translated_base_model}\n"
-                f"text out (predicted with finetuned model)\n"
-                f"\t{translated_finetuned}\n"
-            )
-            print(chunk, end="", flush=True)
-            f.write(chunk)
-    print(f"\nSaved to {out_path}", flush=True)
-
-
 def test_translations(dict_of_models, n_samples=10, source_lang=None, debug=False):
     ts = datetime.now().strftime("%Y%m%d-%H%M")
     INDENT = 60
-    out_path = f"translation_comparison_{ts}.txt"
-    all_models = dict_of_models.copy()
+    csv_path = f"translation_comparison_{ts}.csv"
 
+    print("\nLoading embedder...\n")
+    embedder = SentenceTransformer('sentence-transformers/LaBSE')
+
+    all_models = dict_of_models.copy()
     for name, data in all_models.items():
         dict_of_models[name]['translator'] = create_translator(
             data['cls'],
@@ -62,33 +40,63 @@ def test_translations(dict_of_models, n_samples=10, source_lang=None, debug=Fals
         )
         dict_of_models[name]['translator'].translate_text("Load the shards!", "en", "fr", False)
 
-    with open(out_path, "w", encoding="utf-8") as f:
-        def print_and_write(file, text):
-            file.write(text + "\n")
-            print(text)
-        for i, d in enumerate(sample_jsonl("training_data.jsonl", n_samples, source_lang), start=1):
-            source = d.get("source") + "."
-            target = d.get("target") + "."
-            source_lang = d.get("source_lang")
-            other_lang = "en" if source_lang == "fr" else "fr"
-            print_and_write(
-                f,
-                f"\n[sample {i}/{n_samples}] {language_codes[source_lang]}"
-                f"\n{f'text in ({language_codes[source_lang]}):':<{INDENT}}{source}"
-                f"\n{f'text out ({language_codes[other_lang]}), expected:':<{INDENT}}{target}"
+    csv_data = []
+
+    for i, d in enumerate(sample_jsonl("training_data.jsonl", n_samples, source_lang), start=1):
+        source = d.get("source") + "."
+        target = d.get("target") + "."
+        source_lang = d.get("source_lang")
+        other_lang = "en" if source_lang == "fr" else "fr"
+
+        print(
+            f"\n[sample {i}/{n_samples}] {language_codes[source_lang]}"
+            f"\n{f'text in ({language_codes[source_lang]}):':<{INDENT}}{source}"
+            f"\n{f'text out ({language_codes[other_lang]}), expected:':<{INDENT}}{target}"
+        )
+
+        source_embedding = embedder.encode(source, convert_to_tensor=True)
+        target_embedding = embedder.encode(target, convert_to_tensor=True)
+        cos_sim_original = pytorch_cos_sim(source_embedding, target_embedding).item()
+
+        for name, data in all_models.items():
+            translated_text = data['translator'].translate_text(
+                source,
+                input_language=source_lang,
+                target_language=other_lang,
+                use_finetuned=False
             )
-            for name, data in all_models.items():
-                translated_text = data['translator'].translate_text(
-                    source,
-                    input_language=source_lang,
-                    target_language=other_lang,
-                    use_finetuned=False
-                )
-                print_and_write(
-                    f,
-                    f"{f'text out ({language_codes[other_lang]}), predicted with {name}:':<{INDENT}}{translated_text}"
-                )
-                # data['translator'].clear_cache() # TODO only if out of memory
+
+            translated_embedding = embedder.encode(translated_text, convert_to_tensor=True)
+
+            cos_sim_source = pytorch_cos_sim(source_embedding, translated_embedding).item()
+            cos_sim_target = pytorch_cos_sim(target_embedding, translated_embedding).item()
+
+            csv_data.append({
+                'source': source,
+                'target': target,
+                'source_lang': source_lang,
+                'other_lang': other_lang,
+                'translator_name': name,
+                'translated_text': translated_text,
+                'cosine_similarity_original_translation': cos_sim_original,
+                'cosine_similarity_vs_source': cos_sim_source,
+                'cosine_similarity_vs_target': cos_sim_target,
+            })
+
+            print(
+                f"{f'text out ({language_codes[other_lang]}), predicted with {name}:':<{INDENT}}{translated_text}"
+            )
+
+            # data['translator'].clear_cache()  # TODO only if out of memory
+
+    with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
+        fieldnames = [
+            'source', 'target', 'source_lang', 'other_lang', 'translator_name', 'translated_text',
+            'cosine_similarity_original_translation', 'cosine_similarity_vs_source', 'cosine_similarity_vs_target'
+        ]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(csv_data)
 
 
 if __name__ == "__main__":
@@ -115,5 +123,4 @@ if __name__ == "__main__":
         },
         # consider also testing https://huggingface.co/google/madlad400-3b-mt (requires prefixing with `<2fr>` or `<2en>`)
     }
-
-    test_translations(all_models, n_samples=100, source_lang="fr")
+    test_translations(all_models, n_samples=10)
