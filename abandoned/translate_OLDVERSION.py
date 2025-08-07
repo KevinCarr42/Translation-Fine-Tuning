@@ -112,3 +112,38 @@ def translate_text(input_text, input_language="en", finetuned=True):
     translation = translation.split("\n")[0].strip()  # Take only first line
 
     return translation
+
+
+# BACKUPS FROM EVALUATE.PY
+
+def sample_jsonl(path, n_samples=10, source_lang=None):
+    with open(path, 'r') as f:
+        filtered = (line for line in f if not source_lang or json.loads(line)['source_lang'] == source_lang)
+        data = [json.loads(line) for line in filtered]
+    return random.sample(data, min(n_samples, len(data)))
+
+
+def compare_finetuning(n=10, run_name="compare_finetuning"):
+    ts = datetime.now().strftime("%Y%m%d-%H%M%S")
+    out_path = f"{run_name}_{ts}.txt"
+    with open(out_path, "w", encoding="utf-8") as f:
+        for i, d in enumerate(sample_jsonl("training_data.jsonl", n), start=1):
+            source = d.get("source")
+            target = d.get("target")
+            source_lang = d.get("source_lang")
+            translated_base_model = translate_text(source, source_lang, False)
+            translated_finetuned = translate_text(source, source_lang, True)
+
+            chunk = (
+                f"\n[{i}/{n}] {source_lang}\ttext in\n"
+                f"\t{source}\n"
+                f"text out (expected)\n"
+                f"\t{target}\n"
+                f"text out (predicted with base model)\n"
+                f"\t{translated_base_model}\n"
+                f"text out (predicted with finetuned model)\n"
+                f"\t{translated_finetuned}\n"
+            )
+            print(chunk, end="", flush=True)
+            f.write(chunk)
+    print(f"\nSaved to {out_path}", flush=True)
