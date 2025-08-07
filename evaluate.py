@@ -123,4 +123,5 @@ if __name__ == "__main__":
         },
         # consider also testing https://huggingface.co/google/madlad400-3b-mt (requires prefixing with `<2fr>` or `<2en>`)
     }
-    test_translations(all_models, n_samples=10)
+
+    test_translations(all_models, n_samples=10_000)
