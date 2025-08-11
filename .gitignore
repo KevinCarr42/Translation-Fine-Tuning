@@ -3,5 +3,5 @@
 *.pickle
 __pycache__/
 console_output.txt
-mixtral-finetuned-enfr/
+mixtral-finetuned-enfr*
 *.csv
