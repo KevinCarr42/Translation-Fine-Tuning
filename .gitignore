@@ -5,3 +5,4 @@ __pycache__/
 console_output.txt
 mixtral-finetuned-enfr*
 *.csv
+backup
