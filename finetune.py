@@ -4,6 +4,12 @@ from transformers import (AutoTokenizer, AutoModelForSeq2SeqLM, Seq2SeqTrainer, 
                           DataCollatorForSeq2Seq, BitsAndBytesConfig)
 from peft import LoraConfig, get_peft_model
 
+
+# Check if we're in distributed training mode
+def is_distributed():
+    return int(os.environ.get("WORLD_SIZE", 1)) > 1
+
+
 MODELS = {
     "m2m100_418m": {
         "model_id": "facebook/m2m100_418M",
@@ -29,6 +35,7 @@ MODELS = {
     },
 }
 
+
 def setup_logging(output_directory, to_file=True):
     os.makedirs(output_directory, exist_ok=True)
     handlers = [logging.StreamHandler()]
@@ -36,31 +43,44 @@ def setup_logging(output_directory, to_file=True):
         handlers.append(logging.FileHandler(os.path.join(output_directory, "console_output.txt"), encoding="utf-8"))
     logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s", handlers=handlers)
 
+
 def load_tokenizer_and_model(model_id, use_qlora, use_bfloat16, device_map):
     tokenizer = AutoTokenizer.from_pretrained(model_id, use_fast=True)
     if getattr(tokenizer, "pad_token", None) is None and getattr(tokenizer, "eos_token", None):
         tokenizer.pad_token = tokenizer.eos_token
     model_kwargs = {"torch_dtype": torch.bfloat16 if use_bfloat16 else torch.float16, "trust_remote_code": True}
+
     if use_qlora:
+        # QLoRA can use device_map even in distributed mode
         model_kwargs["quantization_config"] = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_use_double_quant=True,
             bnb_4bit_quant_type="nf4",
             bnb_4bit_compute_dtype=torch.bfloat16 if use_bfloat16 else torch.float16
         )
-        model_kwargs["device_map"] = device_map
-    else:
-        if device_map != "auto":
+        if device_map is not None:
             model_kwargs["device_map"] = device_map
+    else:
+        # When not using QLoRA, only use device_map if explicitly provided and not None
+        if device_map is not None:
+            model_kwargs["device_map"] = device_map
+
     model = AutoModelForSeq2SeqLM.from_pretrained(model_id, **model_kwargs)
     if hasattr(model.config, "vocab_size") and len(tokenizer) > model.config.vocab_size:
         model.resize_token_embeddings(len(tokenizer), mean_resizing=False)
     model.config.use_cache = False
+
+    # Enable gradient checkpointing support if using QLoRA
+    if use_qlora and hasattr(model, "gradient_checkpointing_enable"):
+        model.gradient_checkpointing_enable()
+
     return tokenizer, model
 
-def attach_lora(model, r, alpha, dropout):
+
+def attach_lora(model, r, alpha, dropout, use_qlora=True):
     names = ["q", "k", "v", "o", "q_proj", "k_proj", "v_proj", "o_proj", "in_proj_weight"]
-    detected = [n for n in names if any(hasattr(m, n) or n in type(m).__name__.lower() for _, m in model.named_modules())]
+    detected = [n for n in names if
+                any(hasattr(m, n) or n in type(m).__name__.lower() for _, m in model.named_modules())]
     cfg = LoraConfig(
         r=r,
         lora_alpha=alpha,
@@ -69,10 +89,21 @@ def attach_lora(model, r, alpha, dropout):
         task_type="SEQ_2_SEQ_LM",
         target_modules=list(set(detected)) or None
     )
-    return get_peft_model(model, cfg)
+
+    peft_model = get_peft_model(model, cfg)
+
+    # Enable training mode
+    peft_model.train()
+
+    # Ensure LoRA parameters require gradients
+    peft_model.print_trainable_parameters()
+
+    return peft_model
+
 
 class Preprocessor:
-    def __init__(self, model_name, tokenizer, language_map, max_source_length, max_target_length, restrict_source_language=None):
+    def __init__(self, model_name, tokenizer, language_map, max_source_length, max_target_length,
+                 restrict_source_language=None):
         self.model_name = model_name
         self.tokenizer = tokenizer
         self.language_map = language_map
@@ -116,6 +147,7 @@ class Preprocessor:
 
         return X
 
+
 class M2MDataCollator:
     def __init__(self, tokenizer, model, label_pad_token_id=-100):
         self.tokenizer = tokenizer
@@ -136,11 +168,15 @@ class M2MDataCollator:
         batch["decoder_input_ids"] = shifted
         return batch
 
+
 def build_trainer(args, tokenizer, model, dataset_processed, output_directory, lr, max_steps=None):
     if args.which == "m2m100_418m":
         data_collator = M2MDataCollator(tokenizer, model)
     else:
         data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
+
+    # Disable gradient checkpointing when not using QLoRA to avoid gradient issues
+    use_gradient_checkpointing = not args.no_qlora
 
     training_args = Seq2SeqTrainingArguments(
         output_dir=output_directory,
@@ -161,7 +197,7 @@ def build_trainer(args, tokenizer, model, dataset_processed, output_directory, l
         fp16=args.fp16 and not args.bf16,
         seed=args.seed,
         warmup_ratio=args.warmup_ratio,
-        gradient_checkpointing=True,
+        gradient_checkpointing=use_gradient_checkpointing,
         label_smoothing_factor=0.1,
         dataloader_num_workers=2,
         disable_tqdm=args.disable_tqdm,
@@ -224,6 +260,7 @@ def parse_args(argv=None):
     p.add_argument("--sweep_name", default="sweep")
     return p.parse_args(argv)
 
+
 def train_or_sweep(args):
     model_info = MODELS[args.which]
     raw = load_dataset("json", data_files=args.data, split="train")
@@ -236,11 +273,22 @@ def train_or_sweep(args):
         if args.sweep_eval_samples and len(eval_ds) > args.sweep_eval_samples:
             eval_ds = eval_ds.select(range(args.sweep_eval_samples))
 
+    # Determine the appropriate device_map based on distributed mode and QLoRA usage
+    if not args.no_qlora:
+        # QLoRA can always use device_map
+        device_map = args.device_map
+    elif is_distributed():
+        # Distributed mode without QLoRA - no device_map
+        device_map = None
+    else:
+        # Single GPU mode without QLoRA - can use device_map
+        device_map = args.device_map
+
     tokenizer, _ = load_tokenizer_and_model(
         model_info["model_id"],
         use_qlora=not args.no_qlora,
         use_bfloat16=args.bf16,
-        device_map=args.device_map
+        device_map=device_map
     )
 
     def preprocess(ds):
@@ -267,11 +315,12 @@ def train_or_sweep(args):
             model_info["model_id"],
             use_qlora=not args.no_qlora,
             use_bfloat16=args.bf16,
-            device_map=args.device_map
+            device_map=device_map
         )
-        model = attach_lora(base, r=16, alpha=32, dropout=0.05)
+        model = attach_lora(base, r=16, alpha=32, dropout=0.05, use_qlora=not args.no_qlora)
         steps_per_epoch = math.ceil(len(dataset_processed["train"]) / (args.batch_size * args.grad_accum))
-        logging.info(f"sizes | train={len(dataset_processed['train'])} eval={len(dataset_processed['eval'])} steps/epoch≈{steps_per_epoch}")
+        logging.info(
+            f"sizes | train={len(dataset_processed['train'])} eval={len(dataset_processed['eval'])} steps/epoch≈{steps_per_epoch}")
         trainer = build_trainer(args, tokenizer, model, dataset_processed, output_directory, lr=args.lr, max_steps=None)
         trainer.train()
         model.save_pretrained(os.path.join(output_directory, "lora"))
@@ -308,9 +357,11 @@ def train_or_sweep(args):
     for i, (lr, r, alpha, dropout) in enumerate(combos, 1):
         trial_dir = os.path.join(sweep_root, f"lr{lr}_r{r}_a{alpha}_d{dropout}")
         setup_logging(trial_dir)
-        _, base = load_tokenizer_and_model(model_info["model_id"], use_qlora=not args.no_qlora, use_bfloat16=args.bf16, device_map=args.device_map)
-        model = attach_lora(base, r=r, alpha=alpha, dropout=dropout)
-        trainer = build_trainer(args, tokenizer, model, dataset_processed, trial_dir, lr=lr, max_steps=args.sweep_max_steps)
+        _, base = load_tokenizer_and_model(model_info["model_id"], use_qlora=not args.no_qlora, use_bfloat16=args.bf16,
+                                           device_map=device_map)
+        model = attach_lora(base, r=r, alpha=alpha, dropout=dropout, use_qlora=not args.no_qlora)
+        trainer = build_trainer(args, tokenizer, model, dataset_processed, trial_dir, lr=lr,
+                                max_steps=args.sweep_max_steps)
         train_result = trainer.train()
         metrics = train_result.metrics if train_result and hasattr(train_result, "metrics") else {}
         eval_metrics = trainer.evaluate()
@@ -329,9 +380,11 @@ def train_or_sweep(args):
                  eval_metrics.get("eval_loss", None)]
             )
 
+
 def run_cli(argv=None):
     args = parse_args(argv)
     train_or_sweep(args)
+
 
 if __name__ == "__main__":
     run_cli()
