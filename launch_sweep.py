@@ -40,7 +40,8 @@ def main():
     steps = sys.argv[3] if len(sys.argv) > 3 else "4000"
     cfg = DEFAULTS[model]
     cmd = [
-        "torchrun", "--nproc_per_node=2", "finetune.py",
+        sys.executable, "-m", "torch.distributed.run",
+        "--nproc_per_node=2", "finetune.py",
         "--which", model, "--sweep",
         "--bf16", "--no_qlora", "--disable_tqdm",
         "--sweep_name", "auto",

@@ -1,5 +1,4 @@
 import os, sys, json, argparse, logging, math, torch, csv
-from dataclasses import dataclass
 from datasets import load_dataset
 from transformers import (AutoTokenizer, AutoModelForSeq2SeqLM, Seq2SeqTrainer, Seq2SeqTrainingArguments,
                           DataCollatorForSeq2Seq, BitsAndBytesConfig)
@@ -72,30 +71,77 @@ def attach_lora(model, r, alpha, dropout):
     )
     return get_peft_model(model, cfg)
 
-@dataclass
 class Preprocessor:
-    model_name
-    tokenizer
-    language_map
-    max_source_length
-    max_target_length
-    restrict_source_language=None
-    def __call__(self, example):
-        if self.restrict_source_language and example["source_lang"] != self.restrict_source_language:
+    def __init__(self, model_name, tokenizer, language_map, max_source_length, max_target_length, restrict_source_language=None):
+        self.model_name = model_name
+        self.tokenizer = tokenizer
+        self.language_map = language_map
+        self.max_source_length = max_source_length
+        self.max_target_length = max_target_length
+        self.restrict_source_language = restrict_source_language
+
+    def __call__(self, ex):
+        if self.restrict_source_language and ex["source_lang"] != self.restrict_source_language:
             return {}
-        source_text = example["source"].strip()
-        target_text = example["target"].strip()
-        source_language = example["source_lang"]
-        if self.model_name in {"mbart50_mmt", "m2m100_418m"}:
-            self.tokenizer.src_lang = self.language_map[source_language]
-        inputs = self.tokenizer(source_text, truncation=True, max_length=self.max_source_length)
-        with self.tokenizer.as_target_tokenizer():
-            labels = self.tokenizer(target_text, truncation=True, max_length=self.max_target_length)
-        inputs["labels"] = labels["input_ids"]
-        return inputs
+
+        s = ex["source"].strip()
+        t = ex["target"].strip()
+        sl = ex["source_lang"]
+        tl = "en" if sl == "fr" else "fr"
+
+        if self.model_name == "m2m100_418m":
+            self.tokenizer.src_lang = self.language_map[sl]
+            self.tokenizer.tgt_lang = self.language_map[tl]
+        elif self.model_name == "mbart50_mmt":
+            self.tokenizer.src_lang = self.language_map[sl]
+
+        if not t:
+            return {}
+
+        X = self.tokenizer(s, truncation=True, max_length=self.max_source_length)
+        Y = self.tokenizer(text_target=t, truncation=True, max_length=self.max_target_length)
+        if not Y.get("input_ids"):
+            return {}
+
+        # always set labels
+        X["labels"] = Y["input_ids"]
+
+        # crucial for M2M100: build per-example decoder_input_ids with target lang id
+        if self.model_name == "m2m100_418m":
+            tgt_id = self.tokenizer.get_lang_id(self.language_map[tl])
+            pad_id = self.tokenizer.pad_token_id
+            labels = X["labels"]
+            dec_in = [tgt_id] + [(pad_id if tok == -100 else tok) for tok in labels[:-1]]
+            X["decoder_input_ids"] = dec_in
+
+        return X
+
+class M2MDataCollator:
+    def __init__(self, tokenizer, model, label_pad_token_id=-100):
+        self.tokenizer = tokenizer
+        self.label_pad_token_id = label_pad_token_id
+        self.pad_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
+
+    def __call__(self, features):
+        for f in features:
+            f.pop("decoder_input_ids", None)
+
+        batch = self.pad_collator(features)
+
+        labels = batch["labels"]
+        pad_id = self.tokenizer.pad_token_id
+        labels_for_shift = torch.where(labels == -100, torch.tensor(pad_id, device=labels.device), labels)
+        first_tok = labels_for_shift[:, :1]
+        shifted = torch.cat([first_tok, labels_for_shift[:, :-1]], dim=1)
+        batch["decoder_input_ids"] = shifted
+        return batch
 
 def build_trainer(args, tokenizer, model, dataset_processed, output_directory, lr, max_steps=None):
-    data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
+    if args.which == "m2m100_418m":
+        data_collator = M2MDataCollator(tokenizer, model)
+    else:
+        data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
+
     training_args = Seq2SeqTrainingArguments(
         output_dir=output_directory,
         per_device_train_batch_size=args.batch_size,
@@ -104,7 +150,7 @@ def build_trainer(args, tokenizer, model, dataset_processed, output_directory, l
         learning_rate=lr,
         num_train_epochs=0.0 if max_steps else args.epochs,
         max_steps=max_steps if max_steps else -1,
-        evaluation_strategy="steps",
+        eval_strategy="steps",
         eval_steps=args.eval_steps,
         logging_steps=args.logging_steps,
         save_steps=args.save_steps,
@@ -122,14 +168,27 @@ def build_trainer(args, tokenizer, model, dataset_processed, output_directory, l
         lr_scheduler_type="linear",
         weight_decay=0.01,
     )
-    return Seq2SeqTrainer(
-        model=model,
-        args=training_args,
-        train_dataset=dataset_processed["train"],
-        eval_dataset=dataset_processed["eval"],
-        tokenizer=tokenizer,
-        data_collator=data_collator
-    )
+
+    try:
+        trainer = Seq2SeqTrainer(
+            model=model,
+            args=training_args,
+            train_dataset=dataset_processed["train"],
+            eval_dataset=dataset_processed["eval"],
+            processing_class=tokenizer,  # new API
+            data_collator=data_collator,
+        )
+    except TypeError:
+        trainer = Seq2SeqTrainer(
+            model=model,
+            args=training_args,
+            train_dataset=dataset_processed["train"],
+            eval_dataset=dataset_processed["eval"],
+            tokenizer=tokenizer,  # old API
+            data_collator=data_collator,
+        )
+    return trainer
+
 
 def parse_args(argv=None):
     p = argparse.ArgumentParser()
@@ -193,8 +252,11 @@ def train_or_sweep(args):
             max_target_length=args.max_target_len,
             restrict_source_language=model_info.get("restrict_source_language")
         )
-        out = ds.map(pre, remove_columns=ds.column_names)
-        return out.filter(lambda x: "input_ids" in x)
+        out = ds.map(pre, remove_columns=ds.column_names, load_from_cache_file=False)
+        out = out.filter(
+            lambda x: "input_ids" in x and "labels" in x and x["labels"] is not None and len(x["labels"]) > 0,
+            load_from_cache_file=False)
+        return out
 
     dataset_processed = {"train": preprocess(train_ds), "eval": preprocess(eval_ds)}
 
