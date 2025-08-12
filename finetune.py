@@ -1,4 +1,6 @@
 import os, sys, json, argparse, logging, math, torch, csv
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
 from datasets import load_dataset
 from transformers import (AutoTokenizer, AutoModelForSeq2SeqLM, Seq2SeqTrainer, Seq2SeqTrainingArguments,
                           DataCollatorForSeq2Seq, BitsAndBytesConfig)
