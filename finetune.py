@@ -5,7 +5,6 @@ from transformers import (AutoTokenizer, AutoModelForSeq2SeqLM, Seq2SeqTrainer, 
 from peft import LoraConfig, get_peft_model
 
 
-# Check if we're in distributed training mode
 def is_distributed():
     return int(os.environ.get("WORLD_SIZE", 1)) > 1
 
@@ -16,10 +15,17 @@ MODELS = {
         "type": "seq2seq",
         "language_map": {"en": "en", "fr": "fr"}
     },
-    "mbart50_mmt": {
+    "mbart50_mmt_fr": {
         "model_id": "facebook/mbart-large-50-many-to-many-mmt",
         "type": "seq2seq",
-        "language_map": {"en": "en_XX", "fr": "fr_XX"}
+        "language_map": {"en": "en_XX", "fr": "fr_XX"},
+        "restrict_source_language": "en"
+    },
+    "mbart50_mmt_en": {
+        "model_id": "facebook/mbart-large-50-many-to-many-mmt",
+        "type": "seq2seq",
+        "language_map": {"en": "en_XX", "fr": "fr_XX"},
+        "restrict_source_language": "fr"
     },
     "opus_mt_en_fr": {
         "model_id": "Helsinki-NLP/opus-mt-tc-big-en-fr",
@@ -42,6 +48,22 @@ def setup_logging(output_directory, to_file=True):
     if to_file:
         handlers.append(logging.FileHandler(os.path.join(output_directory, "console_output.txt"), encoding="utf-8"))
     logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s", handlers=handlers)
+
+
+def setup_tokenizer_languages(tokenizer, model_config, source_lang):
+    if "language_map" not in model_config:
+        return tokenizer
+
+    lang_map = model_config["language_map"]
+
+    target_lang = "fr" if source_lang == "en" else "en"
+
+    if hasattr(tokenizer, 'src_lang'):
+        tokenizer.src_lang = lang_map[source_lang]
+    if hasattr(tokenizer, 'tgt_lang'):
+        tokenizer.tgt_lang = lang_map[target_lang]
+
+    return tokenizer
 
 
 def load_tokenizer_and_model(model_id, use_qlora, use_bfloat16, device_map):
@@ -70,7 +92,6 @@ def load_tokenizer_and_model(model_id, use_qlora, use_bfloat16, device_map):
         model.resize_token_embeddings(len(tokenizer), mean_resizing=False)
     model.config.use_cache = False
 
-    # Enable gradient checkpointing support if using QLoRA
     if use_qlora and hasattr(model, "gradient_checkpointing_enable"):
         model.gradient_checkpointing_enable()
 
@@ -91,12 +112,8 @@ def attach_lora(model, r, alpha, dropout, use_qlora=True):
     )
 
     peft_model = get_peft_model(model, cfg)
-
-    # Enable training mode
     peft_model.train()
-
-    # Ensure LoRA parameters require gradients
-    peft_model.print_trainable_parameters()
+    peft_model.print_trainable_parameters()  # Ensure LoRA parameters require gradients
 
     return peft_model
 
@@ -111,41 +128,51 @@ class Preprocessor:
         self.max_target_length = max_target_length
         self.restrict_source_language = restrict_source_language
 
-    def __call__(self, ex):
-        if self.restrict_source_language and ex["source_lang"] != self.restrict_source_language:
+    def _setup_tokenizer_languages(self, source_language, target_language):
+        if not hasattr(self.tokenizer, 'src_lang'):
+            return  # Tokenizer doesn't support language codes
+
+        mapped_source = self.language_map.get(source_language, source_language)
+        mapped_target = self.language_map.get(target_language, target_language)
+
+        if self.model_name in ["m2m100_418m", "mbart50_mmt_fr", "mbart50_mmt_en"]:
+            self.tokenizer.src_lang = mapped_source
+            self.tokenizer.tgt_lang = mapped_target
+
+    def __call__(self, example):
+        if self.restrict_source_language and example["source_lang"] != self.restrict_source_language:
             return {}
 
-        s = ex["source"].strip()
-        t = ex["target"].strip()
-        sl = ex["source_lang"]
-        tl = "en" if sl == "fr" else "fr"
+        source_text = example["source"].strip()
+        target_text = example["target"].strip()
+        source_language = example["source_lang"]
+        target_language = "en" if source_language == "fr" else "fr"
+
+        if not target_text:
+            return {}
+
+        self._setup_tokenizer_languages(source_language, target_language)
+
+        source_tokens = self.tokenizer(source_text, truncation=True, max_length=self.max_source_length)
+        target_tokens = self.tokenizer(text_target=target_text, truncation=True, max_length=self.max_target_length)
+
+        if not target_tokens.get("input_ids"):
+            return {}
+
+        source_tokens["labels"] = target_tokens["input_ids"]
 
         if self.model_name == "m2m100_418m":
-            self.tokenizer.src_lang = self.language_map[sl]
-            self.tokenizer.tgt_lang = self.language_map[tl]
-        elif self.model_name == "mbart50_mmt":
-            self.tokenizer.src_lang = self.language_map[sl]
+            mapped_target = self.language_map[target_language]
+            target_language_id = self.tokenizer.get_lang_id(mapped_target)
+            pad_token_id = self.tokenizer.pad_token_id
+            labels = source_tokens["labels"]
 
-        if not t:
-            return {}
+            decoder_input_ids = [target_language_id] + [
+                (pad_token_id if token == -100 else token) for token in labels[:-1]
+            ]
+            source_tokens["decoder_input_ids"] = decoder_input_ids
 
-        X = self.tokenizer(s, truncation=True, max_length=self.max_source_length)
-        Y = self.tokenizer(text_target=t, truncation=True, max_length=self.max_target_length)
-        if not Y.get("input_ids"):
-            return {}
-
-        # always set labels
-        X["labels"] = Y["input_ids"]
-
-        # crucial for M2M100: build per-example decoder_input_ids with target lang id
-        if self.model_name == "m2m100_418m":
-            tgt_id = self.tokenizer.get_lang_id(self.language_map[tl])
-            pad_id = self.tokenizer.pad_token_id
-            labels = X["labels"]
-            dec_in = [tgt_id] + [(pad_id if tok == -100 else tok) for tok in labels[:-1]]
-            X["decoder_input_ids"] = dec_in
-
-        return X
+        return source_tokens
 
 
 class M2MDataCollator:
@@ -175,7 +202,6 @@ def build_trainer(args, tokenizer, model, dataset_processed, output_directory, l
     else:
         data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
 
-    # Disable gradient checkpointing when not using QLoRA to avoid gradient issues
     use_gradient_checkpointing = not args.no_qlora
 
     training_args = Seq2SeqTrainingArguments(
@@ -203,6 +229,8 @@ def build_trainer(args, tokenizer, model, dataset_processed, output_directory, l
         disable_tqdm=args.disable_tqdm,
         lr_scheduler_type="linear",
         weight_decay=0.01,
+        ddp_find_unused_parameters=False if is_distributed() else None,
+        label_names=["labels"],
     )
 
     try:
@@ -261,27 +289,34 @@ def parse_args(argv=None):
     return p.parse_args(argv)
 
 
+def filter_dataset_by_model(dataset, model_key, model_config):
+    if "restrict_source_language" not in model_config:
+        return dataset
+
+    allowed_lang = model_config["restrict_source_language"]
+    return dataset.filter(lambda x: x["source_lang"] == allowed_lang)
+
+
 def train_or_sweep(args):
     model_info = MODELS[args.which]
     raw = load_dataset("json", data_files=args.data, split="train")
+    raw = filter_dataset_by_model(raw, args.which, MODELS[args.which])
+
     split = raw.train_test_split(test_size=args.val_ratio, seed=args.seed)
     train_ds = split["train"].shuffle(seed=args.seed)
     eval_ds = split["test"].shuffle(seed=args.seed)
+
     if args.sweep:
         if args.sweep_train_samples and len(train_ds) > args.sweep_train_samples:
             train_ds = train_ds.select(range(args.sweep_train_samples))
         if args.sweep_eval_samples and len(eval_ds) > args.sweep_eval_samples:
             eval_ds = eval_ds.select(range(args.sweep_eval_samples))
 
-    # Determine the appropriate device_map based on distributed mode and QLoRA usage
     if not args.no_qlora:
-        # QLoRA can always use device_map
         device_map = args.device_map
     elif is_distributed():
-        # Distributed mode without QLoRA - no device_map
         device_map = None
     else:
-        # Single GPU mode without QLoRA - can use device_map
         device_map = args.device_map
 
     tokenizer, _ = load_tokenizer_and_model(

@@ -1,6 +1,27 @@
 import os, sys, subprocess
 
 DEFAULTS = {
+    "m2m100_418m": {
+        "batch_size": 12,
+        "grad_accum": 2,
+        "lr_grid": ["7e-5", "1e-4", "2e-4"],
+        "r_grid": ["8", "16", "32"],
+        "dropout_grid": ["0.05"]
+    },
+    "mbart50_mmt_fr": {
+        "batch_size": 8,
+        "grad_accum": 2,
+        "lr_grid": ["7e-5", "1e-4", "1.5e-4"],
+        "r_grid": ["16", "32"],
+        "dropout_grid": ["0.05"]
+    },
+    "mbart50_mmt_en": {
+        "batch_size": 8,
+        "grad_accum": 2,
+        "lr_grid": ["7e-5", "1e-4", "1.5e-4"],
+        "r_grid": ["16", "32"],
+        "dropout_grid": ["0.05"]
+    },
     "opus_mt_en_fr": {
         "batch_size": 16,
         "grad_accum": 2,
@@ -13,20 +34,6 @@ DEFAULTS = {
         "grad_accum": 2,
         "lr_grid": ["1e-4", "2e-4", "3e-4"],
         "r_grid": ["8", "16", "32"],
-        "dropout_grid": ["0.05"]
-    },
-    "m2m100_418m": {
-        "batch_size": 12,
-        "grad_accum": 2,
-        "lr_grid": ["7e-5", "1e-4", "2e-4"],
-        "r_grid": ["8", "16", "32"],
-        "dropout_grid": ["0.05"]
-    },
-    "mbart50_mmt": {
-        "batch_size": 8,
-        "grad_accum": 2,
-        "lr_grid": ["7e-5", "1e-4", "1.5e-4"],
-        "r_grid": ["16", "32"],
         "dropout_grid": ["0.05"]
     },
 }
