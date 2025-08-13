@@ -48,7 +48,7 @@ def main():
     cfg = DEFAULTS[model]
     cmd = [
         sys.executable, "-m", "torch.distributed.run",
-        "--nproc_per_node=2", "finetune.py",
+        "--nproc_per_node=2", "finetune_hyperparams.py",
         "--which", model, "--sweep",
         "--bf16", "--no_qlora", "--disable_tqdm",
         "--sweep_name", "auto",
