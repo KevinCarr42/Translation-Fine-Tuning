@@ -1,4 +1,3 @@
-# translate_v2.py
 import logging
 import torch
 from transformers import (
