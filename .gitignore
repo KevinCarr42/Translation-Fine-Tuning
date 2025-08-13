@@ -7,3 +7,4 @@ mixtral-finetuned-enfr*
 *.csv
 backup
 runs/*
+outputs/*
