@@ -270,22 +270,12 @@ def finetune_model(which, data_path, output_directory,
                                        device_map=resolved_device_map)
     model = attach_lora(base, r=lora_r, alpha=lora_alpha, dropout=lora_dropout)
     steps_per_epoch = math.ceil(len(dataset_processed["train"]) / (batch_size * grad_accum))
-    total_steps = int(steps_per_epoch * epochs)
     logging.info(
-        f"sizes | train={len(dataset_processed['train'])} eval={len(dataset_processed['eval'])} steps/epoch≈{steps_per_epoch} total_steps≈{total_steps}")
-
-    adjusted_save_steps = min(save_steps, max(50, total_steps // 4))
-    if adjusted_save_steps != save_steps:
-        logging.info(f"Adjusted save_steps from {save_steps} to {adjusted_save_steps} based on dataset size")
-
-    adjusted_eval_steps = min(eval_steps, max(50, total_steps // 3))
-    if adjusted_eval_steps != eval_steps:
-        logging.info(f"Adjusted eval_steps from {eval_steps} to {adjusted_eval_steps} based on dataset size")
+        f"sizes | train={len(dataset_processed['train'])} eval={len(dataset_processed['eval'])} steps/epoch≈{steps_per_epoch}")
 
     trainer = build_trainer(which, tokenizer, model, dataset_processed, output_directory, learning_rate, batch_size,
                             grad_accum,
-                            epochs, None, adjusted_eval_steps, logging_steps, adjusted_save_steps, bf16, fp16, seed,
-                            warmup_ratio,
+                            epochs, None, eval_steps, logging_steps, save_steps, bf16, fp16, seed, warmup_ratio,
                             disable_tqdm, no_qlora)
     trainer.train()
     model.save_pretrained(os.path.join(output_directory, "lora"))
