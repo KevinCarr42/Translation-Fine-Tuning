@@ -1,39 +1,46 @@
 import os
 from finetune import finetune_model
 
-
 MODELS = {
-    "m2m100_418m": {
-        "batch_size": 12,
-        "grad_accum": 2,
-        "lr": 2e-4,
-        "lora_r": 32,
-        "lora_alpha": 64,
-        "lora_dropout": 0.05
-    },
-    "mbart50_mmt_fr": {
-        "batch_size": 8,
-        "grad_accum": 2,
-        "lr": 1.5e-4,
-        "lora_r": 32,
-        "lora_alpha": 64,
-        "lora_dropout": 0.05
-    },
-    "mbart50_mmt_en": {
-        "batch_size": 8,
-        "grad_accum": 2,
-        "lr": 1.5e-4,
-        "lora_r": 32,
-        "lora_alpha": 64,
-        "lora_dropout": 0.05
-    },
+    # "m2m100_418m": {
+    #     "batch_size": 12,
+    #     "grad_accum": 2,
+    #     "lr": 2e-4,
+    #     "lora_r": 32,
+    #     "lora_alpha": 64,
+    #     "lora_dropout": 0.05,
+    #     "save_steps": 1000,
+    #     "eval_steps": 1000,
+    # },
+    # "mbart50_mmt_fr": {
+    #     "batch_size": 8,
+    #     "grad_accum": 2,
+    #     "lr": 1.5e-4,
+    #     "lora_r": 32,
+    #     "lora_alpha": 64,
+    #     "lora_dropout": 0.05,
+    #     "save_steps": 1000,
+    #     "eval_steps": 1000,
+    # },
+    # "mbart50_mmt_en": {
+    #     "batch_size": 8,
+    #     "grad_accum": 2,
+    #     "lr": 1.5e-4,
+    #     "lora_r": 32,
+    #     "lora_alpha": 64,
+    #     "lora_dropout": 0.05,
+    #     "save_steps": 1000,
+    #     "eval_steps": 1000,
+    # },
     "opus_mt_en_fr": {
         "batch_size": 16,
         "grad_accum": 2,
         "lr": 3e-4,
         "lora_r": 32,
         "lora_alpha": 64,
-        "lora_dropout": 0.05
+        "lora_dropout": 0.05,
+        "save_steps": 500,
+        "eval_steps": 500,
     },
     "opus_mt_fr_en": {
         "batch_size": 16,
@@ -41,16 +48,16 @@ MODELS = {
         "lr": 3e-4,
         "lora_r": 32,
         "lora_alpha": 64,
-        "lora_dropout": 0.05
+        "lora_dropout": 0.05,
+        "save_steps": 500,
+        "eval_steps": 500,
     },
 }
 
 TRAINING_FILE = "training_data.jsonl"
 OUTPUT_ROOT = "outputs"
 EPOCHS = 2.0
-EVAL_STEPS = 1000
 LOGGING_STEPS = 50
-SAVE_STEPS = 1000
 SEED = 42
 WARMUP_RATIO = 0.03
 VAL_RATIO = 0.05
@@ -76,9 +83,9 @@ def main():
             batch_size=int(cfg["batch_size"]),
             grad_accum=int(cfg["grad_accum"]),
             epochs=EPOCHS,
-            eval_steps=EVAL_STEPS,
+            eval_steps=int(cfg["eval_steps"]),
             logging_steps=LOGGING_STEPS,
-            save_steps=SAVE_STEPS,
+            save_steps=int(cfg["save_steps"]),
             seed=SEED,
             warmup_ratio=WARMUP_RATIO,
             val_ratio=VAL_RATIO,
@@ -97,4 +104,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
