@@ -30,15 +30,27 @@ def test_translations(dict_of_models, n_samples=10, source_lang=None, debug=Fals
 
     all_models = dict_of_models.copy()
     for name, data in all_models.items():
+        config_params = {
+            'base_model_id': data['base_model_id'],
+            'model_type': data['model_type'],
+            'local_files_only': False,
+            'use_quantization': False,
+            'debug': debug,
+        }
+
+        if 'merged_model_path' in data:
+            config_params['merged_model_path'] = data['merged_model_path']
+
+        if 'merged_model_path_en_fr' in data:
+            config_params['merged_model_path_en_fr'] = data['merged_model_path_en_fr']
+        if 'merged_model_path_fr_en' in data:
+            config_params['merged_model_path_fr_en'] = data['merged_model_path_fr_en']
+
         dict_of_models[name]['translator'] = create_translator(
             data['cls'],
-            base_model_id=data['base_model_id'],
-            model_type=data['model_type'],
-            local_files_only=False,
-            use_quantization=False,
-            debug=debug,
+            **config_params
         )
-        dict_of_models[name]['translator'].translate_text("Load the shards!", "en", "fr", False)
+        dict_of_models[name]['translator'].translate_text("Load the shards!", "en", "fr")
 
     csv_data = []
 
@@ -62,8 +74,7 @@ def test_translations(dict_of_models, n_samples=10, source_lang=None, debug=Fals
             translated_text = data['translator'].translate_text(
                 source,
                 input_language=source_lang,
-                target_language=other_lang,
-                use_finetuned=False
+                target_language=other_lang
             )
 
             translated_embedding = embedder.encode(translated_text, convert_to_tensor=True)
@@ -101,27 +112,49 @@ def test_translations(dict_of_models, n_samples=10, source_lang=None, debug=Fals
 
 if __name__ == "__main__":
     all_models = {
-        "nllb_3b_researchonly": {
+        # Base models
+        "nllb_3b_base": {
             "cls": NLLBTranslationModel,
             "base_model_id": "facebook/nllb-200-3.3B",
             "model_type": "seq2seq",
         },
-        "opus_mt": {
+        "opus_mt_base": {
             "cls": OpusTranslationModel,
-            "base_model_id": "Helsinki-NLP/opus-mt-tc-big-en-fr",  # fr->en auto-swap
+            "base_model_id": "Helsinki-NLP/opus-mt-tc-big-en-fr",
             "model_type": "seq2seq",
         },
-        "m2m100_418m": {
+        "m2m100_418m_base": {
             "cls": M2M100TranslationModel,
             "base_model_id": "facebook/m2m100_418M",
             "model_type": "seq2seq",
         },
-        "mbart50_mmt": {
+        "mbart50_mmt_base": {
             "cls": MBART50TranslationModel,
             "base_model_id": "facebook/mbart-large-50-many-to-many-mmt",
             "model_type": "seq2seq",
         },
-        # consider also testing https://huggingface.co/google/madlad400-3b-mt (requires prefixing with `<2fr>` or `<2en>`)
+
+        # Finetuned models
+        "m2m100_418m_finetuned": {
+            "cls": M2M100TranslationModel,
+            "base_model_id": "facebook/m2m100_418M",
+            "model_type": "seq2seq",
+            "merged_model_path": "merged/m2m100_418m",
+        },
+        "mbart50_mmt_finetuned": {
+            "cls": MBART50TranslationModel,
+            "base_model_id": "facebook/mbart-large-50-many-to-many-mmt",
+            "model_type": "seq2seq",
+            "merged_model_path_en_fr": "merged/mbart50_mmt_fr",
+            "merged_model_path_fr_en": "merged/mbart50_mmt_en",
+        },
+        "opus_mt_finetuned": {
+            "cls": OpusTranslationModel,
+            "base_model_id": "Helsinki-NLP/opus-mt-tc-big-en-fr",
+            "model_type": "seq2seq",
+            "merged_model_path_en_fr": "merged/opus_mt_en_fr",
+            "merged_model_path_fr_en": "merged/opus_mt_fr_en",
+        },
     }
 
-    test_translations(all_models, n_samples=10_000)
+    test_translations(all_models, n_samples=100)

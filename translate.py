@@ -50,11 +50,13 @@ class BaseTranslationModel:
 
     def load_tokenizer(self):
         if self.tokenizer is None:
+            tokenizer_path = self.parameters.get("merged_model_path", self.base_model_id)
+
             self.tokenizer = AutoTokenizer.from_pretrained(
-                self.base_model_id, **self._tokenizer_kwargs()
+                tokenizer_path, **self._tokenizer_kwargs()
             )
             if getattr(self.tokenizer, "pad_token", None) is None and getattr(
-                self.tokenizer, "eos_token", None
+                    self.tokenizer, "eos_token", None
             ):
                 self.tokenizer.pad_token = self.tokenizer.eos_token
         return self.tokenizer
@@ -62,32 +64,21 @@ class BaseTranslationModel:
     def load_model(self):
         if self.model is None:
             loader = AutoModelForSeq2SeqLM if self.model_type == "seq2seq" else AutoModelForCausalLM
+
+            model_path = self.parameters.get("merged_model_path", self.base_model_id)
+
             self.model = loader.from_pretrained(
-                self.base_model_id, **self._model_kwargs(allow_device_map=True)
+                model_path, **self._model_kwargs(allow_device_map=True)
             )
             tokenizer = self.load_tokenizer()
             if hasattr(self.model.config, "vocab_size") and len(tokenizer) > self.model.config.vocab_size:
                 self.model.resize_token_embeddings(len(tokenizer), mean_resizing=False)
         return self.model
 
-    def load_finetuned_model(self):
-        if self.finetuned_model is None:
-            lora_path = self.parameters.get("lora_path")
-            if not lora_path:
-                raise ValueError("lora_path must be specified to load finetuned model")
-            base_model = self.load_model()
-            self.finetuned_model = PeftModel.from_pretrained(base_model, lora_path)
-        return self.finetuned_model
-
-    def translate_text(
-        self,
-        input_text,
-        input_language="en",
-        target_language="fr",
-        use_finetuned=False,
-        generation_kwargs=None,
-    ):
-        raise NotImplementedError
+    def translate_text(self, input_text, input_language="en", target_language="fr",
+                       generation_kwargs=None):
+        tokenizer = self.load_tokenizer()
+        model = self.load_model()
 
     def clean_output(self, text):
         import re
@@ -123,7 +114,7 @@ class NLLBTranslationModel(BaseTranslationModel):
         generation_kwargs=None,
     ):
         tokenizer = self.load_tokenizer()
-        model = self.load_finetuned_model() if use_finetuned and self.parameters.get("lora_path") else self.load_model()
+        model = self.load_model()
 
         source_code = self.LANGUAGE_CODES[input_language]
         target_code = self.LANGUAGE_CODES[target_language]
@@ -174,7 +165,9 @@ class OpusTranslationModel(BaseTranslationModel):
         if cache_key in self.directional_cache:
             return self.directional_cache[cache_key]
 
-        model_id = self._directional_model_id(source_language, target_language)
+        merged_path = self.parameters.get(f"merged_model_path_{source_language}_{target_language}")
+        model_id = merged_path if merged_path else self._directional_model_id(source_language, target_language)
+
         tokenizer = AutoTokenizer.from_pretrained(model_id, **self._tokenizer_kwargs())
         model = AutoModelForSeq2SeqLM.from_pretrained(
             model_id, **self._model_kwargs(allow_device_map=False)
@@ -219,8 +212,8 @@ class M2M100TranslationModel(BaseTranslationModel):
 
     def translate_text(self, input_text, input_language="en", target_language="fr",
                        use_finetuned=False, generation_kwargs=None):
-        tokenizer = self.load_tokenizer()  # AutoTokenizer -> M2M100Tokenizer
-        model = self.load_model()          # AutoModelForSeq2SeqLM -> M2M100ForConditionalGeneration
+        tokenizer = self.load_tokenizer()
+        model = self.load_model()
 
         source_code = self.LANGUAGE_CODES[input_language]
         target_code = self.LANGUAGE_CODES[target_language]
@@ -247,10 +240,43 @@ class M2M100TranslationModel(BaseTranslationModel):
 class MBART50TranslationModel(BaseTranslationModel):
     LANGUAGE_CODES = {"en": "en_XX", "fr": "fr_XX"}
 
+    def __init__(self, base_model_id, model_type="seq2seq", **parameters):
+        super().__init__(base_model_id, model_type, **parameters)
+        self.directional_cache = {}
+
+    def _get_directional_model_path(self, source_language, target_language):
+        direction_key = f"merged_model_path_{source_language}_{target_language}"
+        if direction_key in self.parameters:
+            return self.parameters[direction_key]
+
+        return self.base_model_id
+
+    def _load_directional(self, source_language, target_language):
+        cache_key = f"{source_language}-{target_language}"
+        if cache_key in self.directional_cache:
+            return self.directional_cache[cache_key]
+
+        model_path = self._get_directional_model_path(source_language, target_language)
+
+        tokenizer = AutoTokenizer.from_pretrained(model_path, **self._tokenizer_kwargs())
+        if getattr(tokenizer, "pad_token", None) is None and getattr(tokenizer, "eos_token", None):
+            tokenizer.pad_token = tokenizer.eos_token
+
+        model = AutoModelForSeq2SeqLM.from_pretrained(
+            model_path, **self._model_kwargs(allow_device_map=False)
+        )
+        if torch.cuda.is_available():
+            model = model.cuda()
+
+        if hasattr(model.config, "vocab_size") and len(tokenizer) > model.config.vocab_size:
+            model.resize_token_embeddings(len(tokenizer), mean_resizing=False)
+
+        self.directional_cache[cache_key] = (tokenizer, model)
+        return tokenizer, model
+
     def translate_text(self, input_text, input_language="en", target_language="fr",
-                       use_finetuned=False, generation_kwargs=None):
-        tokenizer = self.load_tokenizer()  # AutoTokenizer -> MBart50TokenizerFast
-        model = self.load_model()          # AutoModelForSeq2SeqLM -> MBartForConditionalGeneration
+                       generation_kwargs=None):
+        tokenizer, model = self._load_directional(input_language, target_language)
 
         source_code = self.LANGUAGE_CODES[input_language]
         target_code = self.LANGUAGE_CODES[target_language]
@@ -259,7 +285,6 @@ class MBART50TranslationModel(BaseTranslationModel):
         model_inputs = tokenizer(input_text, return_tensors="pt", padding=True)
         model_inputs = {k: (v.to(model.device) if hasattr(v, "to") else v) for k, v in model_inputs.items()}
 
-        # Prefer lang_code_to_id when present; fall back to convert_tokens_to_ids
         target_id = getattr(tokenizer, "lang_code_to_id", {}).get(target_code) if hasattr(tokenizer, "lang_code_to_id") else None
         if target_id is None:
             target_id = tokenizer.convert_tokens_to_ids(target_code)
@@ -272,11 +297,15 @@ class MBART50TranslationModel(BaseTranslationModel):
             "forced_bos_token_id": target_id,
         }
         if generation_kwargs:
-            generation_arguments.update(generation_kwargs)
+            generation_arguments.update(generation_arguments)
 
         output_token_ids = model.generate(**model_inputs, **generation_arguments)
         text_output = tokenizer.batch_decode(output_token_ids, skip_special_tokens=True)[0].strip()
         return self.clean_output(text_output)
+
+    def clear_cache(self):
+        self.directional_cache.clear()
+        super().clear_cache()
 
 
 def create_translator(translator_class, **config):
