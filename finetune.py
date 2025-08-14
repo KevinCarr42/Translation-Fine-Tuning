@@ -40,16 +40,18 @@ def load_tokenizer_and_model(model_id, use_qlora, use_bfloat16, device_map):
     if getattr(tokenizer, "pad_token", None) is None and getattr(tokenizer, "eos_token", None):
         tokenizer.pad_token = tokenizer.eos_token
     model_kwargs = {"torch_dtype": torch.bfloat16 if use_bfloat16 else torch.float16, "trust_remote_code": True}
+
+    is_opus_model = "opus-mt" in model_id.lower() or "helsinki" in model_id.lower()
+
     if use_qlora:
         model_kwargs["quantization_config"] = BitsAndBytesConfig(
             load_in_4bit=True, bnb_4bit_use_double_quant=True, bnb_4bit_quant_type="nf4",
             bnb_4bit_compute_dtype=torch.bfloat16 if use_bfloat16 else torch.float16
         )
-        if device_map is not None:
-            model_kwargs["device_map"] = device_map
-    else:
-        if device_map is not None:
-            model_kwargs["device_map"] = device_map
+
+    if device_map is not None and not is_opus_model:
+        model_kwargs["device_map"] = device_map
+
     model = AutoModelForSeq2SeqLM.from_pretrained(model_id, **model_kwargs)
     if hasattr(model.config, "vocab_size") and len(tokenizer) > model.config.vocab_size:
         model.resize_token_embeddings(len(tokenizer), mean_resizing=False)
@@ -230,6 +232,9 @@ def finetune_model(which, data_path, output_directory,
 
     model_info = MODELS[which]
 
+    # Check if this is an OPUS model
+    is_opus_model = "opus_mt" in which
+
     # Load and filter dataset
     raw = load_dataset("json", data_files=data_path, split="train")
     raw = filter_dataset_by_model(raw, model_info)
@@ -240,13 +245,20 @@ def finetune_model(which, data_path, output_directory,
     split = raw.train_test_split(test_size=val_ratio, seed=seed)
     train_ds = split["train"].shuffle(seed=seed)
     eval_ds = split["test"].shuffle(seed=seed)
+
+    # Determine device_map based on model type and settings
     if not no_qlora:
-        resolved_device_map = device_map
+        # For OPUS models with QLoRA, don't use device_map
+        resolved_device_map = None if is_opus_model else device_map
     else:
         if is_distributed():
             resolved_device_map = None
+        elif is_opus_model:
+            # For OPUS models without QLoRA, also don't use device_map
+            resolved_device_map = None
         else:
             resolved_device_map = device_map
+
     tokenizer, _ = load_tokenizer_and_model(model_info["model_id"], use_qlora=not no_qlora, use_bfloat16=bf16,
                                             device_map=resolved_device_map)
 
@@ -273,13 +285,26 @@ def finetune_model(which, data_path, output_directory,
                                        device_map=resolved_device_map)
     model = attach_lora(base, r=lora_r, alpha=lora_alpha, dropout=lora_dropout)
     steps_per_epoch = math.ceil(len(dataset_processed["train"]) / (batch_size * grad_accum))
+    total_steps = int(steps_per_epoch * epochs)
     logging.info(
-        f"sizes | train={len(dataset_processed['train'])} eval={len(dataset_processed['eval'])} steps/epoch≈{steps_per_epoch}")
+        f"sizes | train={len(dataset_processed['train'])} eval={len(dataset_processed['eval'])} steps/epoch≈{steps_per_epoch} total_steps≈{total_steps}")
+
+    # Adjust save_steps to ensure we get at least 3 checkpoints during training
+    # but not more than the requested save_steps
+    adjusted_save_steps = min(save_steps, max(50, total_steps // 4))
+    if adjusted_save_steps != save_steps:
+        logging.info(f"Adjusted save_steps from {save_steps} to {adjusted_save_steps} based on dataset size")
+
+    # Also adjust eval_steps if needed
+    adjusted_eval_steps = min(eval_steps, max(50, total_steps // 3))
+    if adjusted_eval_steps != eval_steps:
+        logging.info(f"Adjusted eval_steps from {eval_steps} to {adjusted_eval_steps} based on dataset size")
 
     # Pass 'which' to build_trainer so it knows which model is being used
     trainer = build_trainer(which, tokenizer, model, dataset_processed, output_directory, learning_rate, batch_size,
                             grad_accum,
-                            epochs, None, eval_steps, logging_steps, save_steps, bf16, fp16, seed, warmup_ratio,
+                            epochs, None, adjusted_eval_steps, logging_steps, adjusted_save_steps, bf16, fp16, seed,
+                            warmup_ratio,
                             disable_tqdm, no_qlora)
     trainer.train()
     model.save_pretrained(os.path.join(output_directory, "lora"))
