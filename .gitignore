@@ -8,3 +8,4 @@ mixtral-finetuned-enfr*
 backup
 runs/*
 outputs/*
+merged/*

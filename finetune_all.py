@@ -2,36 +2,36 @@ import os
 from finetune import finetune_model
 
 MODELS = {
-    # "m2m100_418m": {
-    #     "batch_size": 12,
-    #     "grad_accum": 2,
-    #     "lr": 2e-4,
-    #     "lora_r": 32,
-    #     "lora_alpha": 64,
-    #     "lora_dropout": 0.05,
-    #     "save_steps": 1000,
-    #     "eval_steps": 1000,
-    # },
-    # "mbart50_mmt_fr": {
-    #     "batch_size": 8,
-    #     "grad_accum": 2,
-    #     "lr": 1.5e-4,
-    #     "lora_r": 32,
-    #     "lora_alpha": 64,
-    #     "lora_dropout": 0.05,
-    #     "save_steps": 1000,
-    #     "eval_steps": 1000,
-    # },
-    # "mbart50_mmt_en": {
-    #     "batch_size": 8,
-    #     "grad_accum": 2,
-    #     "lr": 1.5e-4,
-    #     "lora_r": 32,
-    #     "lora_alpha": 64,
-    #     "lora_dropout": 0.05,
-    #     "save_steps": 1000,
-    #     "eval_steps": 1000,
-    # },
+    "m2m100_418m": {
+        "batch_size": 12,
+        "grad_accum": 2,
+        "lr": 2e-4,
+        "lora_r": 32,
+        "lora_alpha": 64,
+        "lora_dropout": 0.05,
+        "save_steps": 1000,
+        "eval_steps": 1000,
+    },
+    "mbart50_mmt_fr": {
+        "batch_size": 8,
+        "grad_accum": 2,
+        "lr": 1.5e-4,
+        "lora_r": 32,
+        "lora_alpha": 64,
+        "lora_dropout": 0.05,
+        "save_steps": 1000,
+        "eval_steps": 1000,
+    },
+    "mbart50_mmt_en": {
+        "batch_size": 8,
+        "grad_accum": 2,
+        "lr": 1.5e-4,
+        "lora_r": 32,
+        "lora_alpha": 64,
+        "lora_dropout": 0.05,
+        "save_steps": 1000,
+        "eval_steps": 1000,
+    },
     "opus_mt_en_fr": {
         "batch_size": 16,
         "grad_accum": 2,
@@ -39,8 +39,8 @@ MODELS = {
         "lora_r": 32,
         "lora_alpha": 64,
         "lora_dropout": 0.05,
-        "save_steps": 500,
-        "eval_steps": 500,
+        "save_steps": 1000,
+        "eval_steps": 1000,
     },
     "opus_mt_fr_en": {
         "batch_size": 16,
@@ -49,14 +49,14 @@ MODELS = {
         "lora_r": 32,
         "lora_alpha": 64,
         "lora_dropout": 0.05,
-        "save_steps": 500,
-        "eval_steps": 500,
+        "save_steps": 1000,
+        "eval_steps": 1000,
     },
 }
 
 TRAINING_FILE = "training_data.jsonl"
 OUTPUT_ROOT = "outputs"
-EPOCHS = 2.0
+EPOCHS = 1.0
 LOGGING_STEPS = 50
 SEED = 42
 WARMUP_RATIO = 0.03
