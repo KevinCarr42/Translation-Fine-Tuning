@@ -47,6 +47,7 @@ def merge_one(base_model_id, lora_dir, out_dir, dtype=torch.bfloat16):
 
 def main():
     for name, cfg in translation_models.items():
+        print(f'\nmerging {name}')
         merge_one(cfg["base_model"], cfg["lora_dir"], cfg["out_dir"])
 
 

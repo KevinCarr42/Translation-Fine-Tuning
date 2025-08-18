@@ -1,4 +1,5 @@
 import random
+from datasets import load_dataset
 from datetime import datetime
 import json
 import csv
@@ -13,16 +14,30 @@ language_codes = {
 }
 
 
-def sample_jsonl(path, n_samples=10, source_lang=None):
-    with open(path, 'r') as f:
-        filtered = (line for line in f if not source_lang or json.loads(line)['source_lang'] == source_lang)
-        data = [json.loads(line) for line in filtered]
-    return random.sample(data, min(n_samples, len(data)))
+def sample_data(path, n_samples=10, source_lang=None,
+                use_eval_split=False, val_ratio=0.05, split_seed=42):
+    if use_eval_split:
+        ds = load_dataset("json", data_files=path, split="train")
+        if source_lang:
+            ds = ds.filter(lambda x: x.get("source_lang") == source_lang, load_from_cache_file=False)
+        eval_ds = ds.train_test_split(test_size=val_ratio, seed=split_seed)["test"]
+        k = len(eval_ds) if n_samples is None else min(n_samples, len(eval_ds))
+        if k < len(eval_ds):
+            idx = random.sample(range(len(eval_ds)), k)
+            return [eval_ds[i] for i in idx]
+        return [eval_ds[i] for i in range(len(eval_ds))]
+    else:
+        with open(path, "r", encoding="utf-8") as f:
+            data = [json.loads(line) for line in f
+                    if not source_lang or json.loads(line).get("source_lang") == source_lang]
+        k = len(data) if n_samples is None else min(n_samples, len(data))
+        return random.sample(data, k) if k < len(data) else data
 
 
-def test_translations(dict_of_models, n_samples=10, source_lang=None, debug=False):
+def test_translations(dict_of_models, testing_data, n_samples=10, source_lang=None,
+                      use_eval_split=True, debug=False):
     ts = datetime.now().strftime("%Y%m%d-%H%M")
-    INDENT = 60
+    INDENT = 70
     csv_path = f"translation_comparison_{ts}.csv"
 
     print("\nLoading embedder...\n")
@@ -54,7 +69,8 @@ def test_translations(dict_of_models, n_samples=10, source_lang=None, debug=Fals
 
     csv_data = []
 
-    for i, d in enumerate(sample_jsonl("training_data.jsonl", n_samples, source_lang), start=1):
+    for i, d in enumerate(sample_data(testing_data, n_samples, source_lang,
+                                      use_eval_split=True, val_ratio=0.05, split_seed=42), start=1):
         source = d.get("source") + "."
         target = d.get("target") + "."
         source_lang = d.get("source_lang")
@@ -111,6 +127,9 @@ def test_translations(dict_of_models, n_samples=10, source_lang=None, debug=Fals
 
 
 if __name__ == "__main__":
+    training_data = "training_data.jsonl"
+    testing_data = "testing_data.jsonl"
+
     all_models = {
         "nllb_3b_base_researchonly": {
             "cls": NLLBTranslationModel,
@@ -157,4 +176,5 @@ if __name__ == "__main__":
         },
     }
 
-    test_translations(all_models, n_samples=10)
+    # test_translations(all_models, testing_data, n_samples=1000, use_eval_split=False)
+    test_translations(all_models, training_data, n_samples=10, use_eval_split=True)
