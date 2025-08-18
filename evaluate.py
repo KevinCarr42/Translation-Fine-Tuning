@@ -112,41 +112,16 @@ def test_translations(dict_of_models, n_samples=10, source_lang=None, debug=Fals
 
 if __name__ == "__main__":
     all_models = {
-        # Base models
-        "nllb_3b_base": {
+        "nllb_3b_base_researchonly": {
             "cls": NLLBTranslationModel,
             "base_model_id": "facebook/nllb-200-3.3B",
             "model_type": "seq2seq",
         },
+
         "opus_mt_base": {
             "cls": OpusTranslationModel,
             "base_model_id": "Helsinki-NLP/opus-mt-tc-big-en-fr",
             "model_type": "seq2seq",
-        },
-        "m2m100_418m_base": {
-            "cls": M2M100TranslationModel,
-            "base_model_id": "facebook/m2m100_418M",
-            "model_type": "seq2seq",
-        },
-        "mbart50_mmt_base": {
-            "cls": MBART50TranslationModel,
-            "base_model_id": "facebook/mbart-large-50-many-to-many-mmt",
-            "model_type": "seq2seq",
-        },
-
-        # Finetuned models
-        "m2m100_418m_finetuned": {
-            "cls": M2M100TranslationModel,
-            "base_model_id": "facebook/m2m100_418M",
-            "model_type": "seq2seq",
-            "merged_model_path": "merged/m2m100_418m",
-        },
-        "mbart50_mmt_finetuned": {
-            "cls": MBART50TranslationModel,
-            "base_model_id": "facebook/mbart-large-50-many-to-many-mmt",
-            "model_type": "seq2seq",
-            "merged_model_path_en_fr": "merged/mbart50_mmt_fr",
-            "merged_model_path_fr_en": "merged/mbart50_mmt_en",
         },
         "opus_mt_finetuned": {
             "cls": OpusTranslationModel,
@@ -155,6 +130,31 @@ if __name__ == "__main__":
             "merged_model_path_en_fr": "merged/opus_mt_en_fr",
             "merged_model_path_fr_en": "merged/opus_mt_fr_en",
         },
+
+        "m2m100_418m_base": {
+            "cls": M2M100TranslationModel,
+            "base_model_id": "facebook/m2m100_418M",
+            "model_type": "seq2seq",
+        },
+        "m2m100_418m_finetuned": {
+            "cls": M2M100TranslationModel,
+            "base_model_id": "facebook/m2m100_418M",
+            "model_type": "seq2seq",
+            "merged_model_path": "merged/m2m100_418m",
+        },
+
+        "mbart50_mmt_base": {
+            "cls": MBART50TranslationModel,
+            "base_model_id": "facebook/mbart-large-50-many-to-many-mmt",
+            "model_type": "seq2seq",
+        },
+        "mbart50_mmt_finetuned": {
+            "cls": MBART50TranslationModel,
+            "base_model_id": "facebook/mbart-large-50-many-to-many-mmt",
+            "model_type": "seq2seq",
+            "merged_model_path_en_fr": "merged/mbart50_mmt_fr",
+            "merged_model_path_fr_en": "merged/mbart50_mmt_en",
+        },
     }
 
-    test_translations(all_models, n_samples=100)
+    test_translations(all_models, n_samples=10)
