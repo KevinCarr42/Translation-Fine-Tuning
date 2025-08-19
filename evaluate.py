@@ -71,8 +71,8 @@ def test_translations(dict_of_models, testing_data, n_samples=10, source_lang=No
 
     for i, d in enumerate(sample_data(testing_data, n_samples, source_lang,
                                       use_eval_split=True, val_ratio=0.05, split_seed=42), start=1):
-        source = d.get("source") + "."
-        target = d.get("target") + "."
+        source = d.get("source")
+        target = d.get("target")
         source_lang = d.get("source_lang")
         other_lang = "en" if source_lang == "fr" else "fr"
 
@@ -176,5 +176,5 @@ if __name__ == "__main__":
         },
     }
 
-    # test_translations(all_models, testing_data, n_samples=1000, use_eval_split=False)
-    test_translations(all_models, training_data, n_samples=10, use_eval_split=True)
+    test_translations(all_models, testing_data, n_samples=1000, use_eval_split=False)
+    test_translations(all_models, training_data, n_samples=1000, use_eval_split=True)
