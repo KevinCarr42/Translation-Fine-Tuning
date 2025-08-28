@@ -1,0 +1,520 @@
+[sample 1/20] English
+text in (English):                                                    For example, the objective for a timing window could be to reduce the probability of exposure of fish life processes to a pressure, while another may tolerate some exposure provided it does not result in harm to fish and fish habitat above a tolerable level (e.g., mortality or measurable population effect)
+text out (French), expected:                                          Par exemple, l'objectif d'une période particulière pourrait être de réduire la probabilité d'exposition des processus vitaux du poisson à une pression, tandis qu une autre peut tolérer une certaine exposition à condition qu elle ne cause pas de dommages au poisson et à son habitat au-delà d'un niveau tolérable (comme la mortalité ou un effet mesurable sur la population)
+text out (French), predicted with nllb_3b_base_researchonly:          Par exemple, l'objectif d'une fenêtre temporelle pourrait être de réduire la probabilité d'exposition des processus de vie des poissons à une pression, tandis qu'une autre pourrait tolérer une certaine exposition, à condition qu'elle n'entraîne pas de dommages aux poissons et à l'habitat des poissons supérieurs à un niveau tolérable (par exemple, mortalité ou effet mesurable sur la population).
+text out (French), predicted with opus_mt_base:                       Par exemple, l’objectif d’une fenêtre temporelle pourrait être de réduire la probabilité d’exposition des processus biologiques du poisson à une pression, tandis qu’une autre pourrait tolérer une certaine exposition à condition qu’elle n’entraîne pas de dommages au poisson et à son habitat au-dessus d’un niveau tolérable (p. ex. mortalité ou effet mesurable sur la population).
+text out (French), predicted with opus_mt_finetuned:                  Par exemple, l'objectif d'une fenêtre temporelle pourrait être de réduire la probabilité d'exposition des processus biologiques du poisson à une pression, tandis qu un autre peut tolérer une certaine exposition à condition qu elle ne nuise pas au poisson et à son habitat au-dessus d'un niveau tolérable (p.
+text out (French), predicted with m2m100_418m_base:                   Par exemple, l’objectif d’une fenêtre de timing pourrait être de réduire la probabilité d’exposition des processus de vie des poissons à une pression, tandis que l’autre peut tolérer une certaine exposition à condition qu’elle ne provoque pas de dommages aux poissons et à l’habitat des poissons au-dessus d’un niveau tolérable (par exemple, la mortalité ou l’effet de la population mesurable).
+text out (French), predicted with m2m100_418m_finetuned:              Par exemple, l'objectif d'une fenêtre temporelle pourrait être de réduire la probabilité d'exposition des processus biologiques du poisson à une pression, tandis que l'autre peut tolérer une certaine exposition à condition qu elle ne provoque pas de dommages au poisson et à son habitat au-dessus d'un niveau tolérable (p.
+text out (French), predicted with mbart50_mmt_base:                   Par exemple, l'objectif d'une fenêtre de calendrier pourrait être de réduire la probabilité d'exposition des processus de vie du poisson à une pression, alors qu'une autre peut tolérer une certaine exposition à condition qu'elle n'entraîne pas de préjudice au poisson et à son habitat supérieur à un niveau tolérable (p. ex. mortalité ou effet de population mesurable)
+text out (French), predicted with mbart50_mmt_finetuned:              Par exemple, l'objectif d'une fenêtre de temps pourrait être de réduire la probabilité d'exposition des processus biologiques du poisson à une pression, tandis que d'autres pourraient tolérer une certaine exposition à condition qu elle n'entraîne pas de dommages au poisson et à son habitat au-dessus d'un niveau tolérable (p.
+
+[sample 2/20] English
+text in (English):                                                    Given the current stock size and age of recruitment, stock rebuilding Is expected to be slow
+text out (French), expected:                                          Etant donne l'effectlf actuel du stock et I'Age du recrutement, le retabllssement du stock devralt Atre lent
+text out (French), predicted with nllb_3b_base_researchonly:          Compte tenu de la taille actuelle du stock et de l'âge du recrutement, la reconstruction du stock devrait être lente.
+text out (French), predicted with opus_mt_base:                       Compte tenu de la taille actuelle du stock et de l'âge du recrutement, la reconstitution des stocks devrait être lente
+text out (French), predicted with opus_mt_finetuned:                  Compte tenu de la taille actuelle du stock et de l'âge du recrutement, le rétablissement du stock devrait être lent.
+text out (French), predicted with m2m100_418m_base:                   Compte tenu de la taille actuelle des stocks et de l'âge de recrutement, la reconstruction des stocks devrait être lente
+text out (French), predicted with m2m100_418m_finetuned:              Compte tenu de la taille actuelle du stock et de l'âge du recrutement, le rétablissement du stock devrait être lent.
+text out (French), predicted with mbart50_mmt_base:                   Compte tenu de la taille actuelle du stock et de l’âge du recrutement, la reconstitution du stock devrait être lente
+text out (French), predicted with mbart50_mmt_finetuned:              Compte tenu de la taille actuelle du stock et de l'âge du recrutement, le rétablissement du stock devrait être lent.
+
+[sample 3/20] French
+text in (French):                                                     Quant aux débarquements des pêcheurs au filet maillant (820 t) et des pêcheries à fascines de la Nouvelle-Écosse (700 t), ils étaient peu élevés et très inférieurs à ceux de 1999
+text out (English), expected:                                         Landings by both the gillnet sector (820t) and the Nova Scotia weirs (700t) were very small and considerably lower than in 1999
+text out (English), predicted with nllb_3b_base_researchonly:         As for the landings of gillnet fishermen (820 tonnes) and the Nova Scotia gillnet fisheries (700 tonnes), they were low and much lower than in 1999
+text out (English), predicted with opus_mt_base:                      The landings of gillnet fishers (820 t) and fascinating fisheries in Nova Scotia (700 t) were low and well below 1999 levels.
+text out (English), predicted with opus_mt_finetuned:                 The landings of gillnet fishers (820 t) and the Nova Scotia gillnet fishery (700 t) were low and much lower than in 1999
+text out (English), predicted with m2m100_418m_base:                  As for the landings fishermen with the melting network (820 t) and fishing in New Scotland (700 t), they were low and much lower than those of 1999
+text out (English), predicted with m2m100_418m_finetuned:             For the landings gillnet fishermen (820 t) and New Scotian fisheries (700 t), they were low and much lower than those of 1999
+text out (English), predicted with mbart50_mmt_base:                  As for the landings of the maillant net fishermen (820 t) and the Nova Scotia shellfish fishery (700 t), they were low and very low compared to 1999
+text out (English), predicted with mbart50_mmt_finetuned:             With respect to landings of gillnet fishermen (820 t) and Nova Scotia trawl fisheries (700 t), they were low and very low compared to 1999
+
+	preprocessing text
+	Quant aux débarquements des pêcheurs au filet maillant (820 t) et des pêcheries à fascines de la Nouvelle-Écosse (700 t), ils étaient peu élevés et très inférieurs à ceux de 1999
+	Quant aux __TECHNICAL_001__ des pêcheurs au filet maillant (820 t) et des pêcheries à fascines de la Nouvelle-Écosse (700 t), ils étaient peu élevés et très inférieurs à ceux de 1999
+	postprocessing text
+	With respect to __TECHNICAL_001__ of gillnet fishermen (820 t) and Nova Scotia trawl fisheries (700 t), they were low and very low compared to 1999
+	With respect to landings of gillnet fishermen (820 t) and Nova Scotia trawl fisheries (700 t), they were low and very low compared to 1999
+
+[sample 4/20] English
+text in (English):                                                    However, considering that channel width in the Discovery Islands area varies between approximately 850 and 3,200 meters (Mimeault et al., 2017), a farm with dimension of 100 m by 100 m by 20 m depth would span over approximately three to 12 of the width of the channel (Figure 5) in the top 20 meters
+text out (French), expected:                                          Toutefois, compte tenu du fait que dans cette région, la largeur des chenaux varie entre 850 et 3 200 mètres (Mimeault et al., 2017), une ferme de 100 m'de longueur sur 100 m'de largeur sur 20 m'de profondeur s'étendrait sur environ 3 à 12 de la largeur du chenal (Figure 5) dans les 20 mètres supérieurs
+text out (French), predicted with nllb_3b_base_researchonly:          Cependant, compte tenu du fait que la largeur du canal dans la région des îles Discovery varie entre environ 850 et 3 200 mètres (Mimeault et al., 2017), une ferme de 100 m par 100 m par 20 m de profondeur couvrirait environ trois à 12 de la largeur du canal (figure 5) dans les 20 mètres supérieurs.
+text out (French), predicted with opus_mt_base:                       Cependant, étant donné que la largeur du chenal dans la région des îles Discovery varie entre 850 et 3 200 mètres environ (Mimeault et al., 2017), une ferme d’une dimension de 100 m par 100 m par 20 m de profondeur s’étendrait sur environ trois à 12 mètres de la largeur du chenal (figure 5) dans les 20 mètres supérieurs.
+text out (French), predicted with opus_mt_finetuned:                  Cependant, étant donné que la largeur du chenal dans la région des îles Discovery varie entre environ 850 et 3 200 mètres (Mimeault et coll., 2017), une ferme d'une dimension de 100 m'par 100 m'par 20 m'de profondeur s'étendrait sur environ trois à 12 de la largeur du chenal (figure 5) dans les 20 premiers mètres.
+text out (French), predicted with m2m100_418m_base:                   Cependant, compte tenu que la largeur du canal dans la région des îles Discovery varie entre environ 850 et 3 200 mètres (Mimeault et al., 2017), une ferme avec une dimension de 100 mètres par 100 mètres par 20 mètres de profondeur s’étendrait sur environ trois à 12 de la largeur du canal (Figure 5) dans les 20 mètres de haut.
+text out (French), predicted with m2m100_418m_finetuned:              Cependant, étant donné que la largeur du chenal dans la région des îles Discovery varie d'environ 850 à 3 200 mètres (Mimeault et coll., 2017), une ferme de taille de 100 m'à 100 m'à 20 m'de profondeur s'étendrait sur environ trois à 12 de la largeur du chenal (Figure 5) dans les 20 meilleurs mètres.
+text out (French), predicted with mbart50_mmt_base:                   Toutefois, étant donné que la largeur du canal dans la région des îles Discovery varie d'environ 850 à 3 200 mètres (Mimeault et coll., 2017), une ferme de 100 m par 100 m par 20 m de profondeur s'étendrait sur environ trois à 12 mètres de la largeur du canal (figure 5) dans les 20 mètres supérieurs.
+text out (French), predicted with mbart50_mmt_finetuned:              Toutefois, étant donné que la largeur du chenal dans la région des îles Discovery varie d'environ 850 à 3 200 mètres (Mimeault et coll., 2017), une ferme dont la dimension est de 100 m'par 100 m'par 20 m'de profondeur s'étendrait sur environ trois à 12 de la largeur du chenal (figure 5) dans les 20 mètres supérieurs.
+
+[sample 5/20] English
+text in (English):                                                    Recreational catches of small salmon were 434, about 40 less than in 1993
+text out (French), expected:                                          Les prises de petits saumons de la pêche récréative ont atteint 434 poissons, soit 40 environ de moins qu'en 1993
+text out (French), predicted with nllb_3b_base_researchonly:          Les captures récréatives de petit saumon ont été de 434, soit environ 40 de moins qu'en 1993
+text out (French), predicted with opus_mt_base:                       Les prises récréatives de petits saumons étaient de 434, soit environ 40 de moins qu'en 1993.
+text out (French), predicted with opus_mt_finetuned:                  Les prises récréatives de petits saumons étaient de 434 individus, soit environ 40 de moins qu en 1993.
+text out (French), predicted with m2m100_418m_base:                   Les captures récréatives de petite salmon était de 434, environ 40 moins que en 1993
+text out (French), predicted with m2m100_418m_finetuned:              Les prises récréatives de petits saumons étaient de 434, environ 40 moins que en 1993
+text out (French), predicted with mbart50_mmt_base:                   Les prises récréatives de petits saumons ont été de 434, soit environ 40 moins qu’en 1993
+text out (French), predicted with mbart50_mmt_finetuned:              Les prises récréatives de petits saumons ont été de 434, soit environ 40 moins qu'en 1993
+
+[sample 6/20] English
+text in (English):                                                    Effective effort Approach of a periodic questionnaire on fishing power is a good one
+text out (French), expected:                                          Effort effectif L'envoi d'un questionnaire périodique sur la capacité de pêche est une bonne approche
+text out (French), predicted with nllb_3b_base_researchonly:          Effort effectif L'approche d'un questionnaire périodique sur la puissance de pêche est bonne
+text out (French), predicted with opus_mt_base:                       Effort efficace L'approche d'un questionnaire périodique sur la puissance de pêche est bonne
+text out (French), predicted with opus_mt_finetuned:                  Effort efficace L'approche d'un questionnaire périodique sur la puissance de pêche est bonne
+text out (French), predicted with m2m100_418m_base:                   Une approche efficace d'un questionnaire périodique sur la puissance de la pêche est une bonne
+text out (French), predicted with m2m100_418m_finetuned:              Effort efficace L'approche d'un questionnaire périodique sur la puissance de pêche est une bonne.
+text out (French), predicted with mbart50_mmt_base:                   Efforts efficaces L'approche d'un questionnaire périodique sur la puissance de pêche est bonne
+text out (French), predicted with mbart50_mmt_finetuned:              Effort efficace L'approche d'un questionnaire périodique sur la puissance de pêche est une bonne
+
+[sample 7/20] English
+text in (English):                                                    schlosseri have recently invaded (i.e., Newfoundland and Labrador), would it be wise to increase the data set for predictions to include data points from the U.S
+text out (French), expected:                                          Terre- Neuve et Labrador), est-il sage d'enrichir les ensembles de données pour établir des prévisions incluant des points de données provenant des côtes américaines
+text out (French), predicted with nllb_3b_base_researchonly:          Si l'on considère que la plupart des espèces de schlosseri ont récemment envahi (c'est-à-dire Terre-Neuve-et-Labrador), serait-il judicieux d'augmenter l'ensemble de données pour les prédictions afin d'inclure des points de données des États-Unis ?
+text out (French), predicted with opus_mt_base:                       schlosseri ont récemment envahi (c.-à-d. Terre-Neuve-et-Labrador), serait-il sage d'augmenter l'ensemble de données pour les prédictions afin d'inclure des points de données provenant des États-Unis?
+text out (French), predicted with opus_mt_finetuned:                  schlosseri ont récemment envahi (c.-à-d., Terre-Neuve-et-Labrador), serait-il sage d'augmenter l'ensemble de données pour les prévisions afin d'inclure les points de données des États-Unis.
+text out (French), predicted with m2m100_418m_base:                   Schlosseri ont récemment envahit (c'est-à-dire Newfoundland et Labrador), il serait raisonnable d'augmenter les données mises pour les prévisions pour inclure les points de données des États-Unis
+text out (French), predicted with m2m100_418m_finetuned:              schlosseri ont récemment envahit ( Terre-Neuve-et-Labrador), serait-il raisonnable d'augmenter l'ensemble de données pour les prédictions pour inclure les points de données des États-Unis.
+text out (French), predicted with mbart50_mmt_base:                   schlosseri ont récemment envahi (c.-à-d. Terre-Neuve-et-Labrador), serait-il judicieux d'augmenter la série de données pour les prévisions afin d'inclure des points de données des États-Unis?
+text out (French), predicted with mbart50_mmt_finetuned:              schlosseri ont récemment envahi (Terre-Neuve-et-Labrador), serait-il judicieux d'augmenter l'ensemble de données pour les prévisions afin d'inclure les points de données des États-Unis.
+
+[sample 8/20] English
+text in (English):                                                    COSEWIC designated iBoF salmon as Endangered in 2001
+text out (French), expected:                                          Région des Maritimes EPR du saumon atlantique de l'arrière-baie de Fundy 4 Le saumon atlantique de l'arrière-baie de Fundy a été désigné comme étant en voie de disparition par le COSEPAC en 2001
+text out (French), predicted with nllb_3b_base_researchonly:          Le COSEWIC a classé le saumon iBoF comme espèce en voie de disparition en 2001
+text out (French), predicted with opus_mt_base:                       Le COSEPAC a désigné le saumon de l'IBF comme étant en voie de disparition en 2001
+text out (French), predicted with opus_mt_finetuned:                  Le COSEPAC a désigné le saumon de l'IBF comme étant en voie de disparition en 2001
+text out (French), predicted with m2m100_418m_base:                   COSEWIC a désigné iBoF salmon comme Endangered en 2001
+text out (French), predicted with m2m100_418m_finetuned:              Le COSEPAC a désigné le saumon iBoF comme étant en péril en 2001
+text out (French), predicted with mbart50_mmt_base:                   Le COSEPAC désigne le saumon iBoF comme étant en voie de disparition en 2001
+text out (French), predicted with mbart50_mmt_finetuned:              Le COSEPAC désigne le saumon de l'IBF comme étant en voie de disparition en 2001
+
+[sample 9/20] English
+text in (English):                                                    The sensitivity runs result in similar conclusions: stock status at the beginning of 2021 for all eight sensitivity runs lie within the Healthy zone with a probability of 1 (Figure 10)
+text out (French), expected:                                          Les analyses de sensibilité aboutissent à des conclusions similaires : l'état des stocks au début de 2021, pour les huit analyses de sensibilité, se situe dans la zone saine avec une probabilité de 1 (figure 10)
+text out (French), predicted with nllb_3b_base_researchonly:          Les essais de sensibilité aboutissent à des conclusions similaires: l'état des stocks au début de 2021 pour les huit essais de sensibilité se situe dans la zone saine avec une probabilité de 1 (figure 10)
+text out (French), predicted with opus_mt_base:                       Les séries de sensibilité aboutissent à des conclusions similaires: l'état des stocks au début de 2021 pour les huit séries de sensibilité se situent dans la zone saine avec une probabilité de 1 (figure 10).
+text out (French), predicted with opus_mt_finetuned:                  Les relevés de sensibilité aboutissent à des conclusions similaires : l'état du stock au début de 2021 pour les huit relevés de sensibilité se situe dans la zone saine avec une probabilité de 1 (figure 10).
+text out (French), predicted with m2m100_418m_base:                   Les courses de sensibilité résultent de conclusions similaires : l'état de stock au début de 2021 pour les huit courses de sensibilité se situe dans la zone saine avec une probabilité de 1 (Figure 10)
+text out (French), predicted with m2m100_418m_finetuned:              Les exercices de sensibilité tirent des conclusions semblables : l'état du stock au début de 2021 pour tous les huit exercices de sensibilité se situent dans la zone saine avec une probabilité de 1 (figure 10) (figure 10).
+text out (French), predicted with mbart50_mmt_base:                   Les essais de sensibilité donnent lieu à des conclusions similaires : l'état des stocks au début de 2021 pour les huit essais de sensibilité se situe dans la zone Santé avec une probabilité de 1 (figure 10)
+text out (French), predicted with mbart50_mmt_finetuned:              Les analyses de sensibilité donnent des conclusions similaires : l'état du stock au début de 2021 pour les huit analyses de sensibilité se situe dans la zone saine avec une probabilité de 1 (Figure 10)
+
+[sample 10/20] English
+text in (English):                                                    The spatial distributions of mature females, pre-recruit and exploitable males, and small crab were mapped and examined using catch rates for each survey set
+text out (French), expected:                                          9 La répartition spatiale des femelles matures, des prérecrues et des mâles exploitables ainsi que des petits crabes a été cartographiée et examinée à partir des taux de prise de chaque trait de relevé
+text out (French), predicted with nllb_3b_base_researchonly:          Les distributions spatiales des femelles matures, des mâles pré-recrutés et exploitables, et des petits crabes ont été cartographiées et examinées en utilisant les taux de capture pour chaque groupe d'enquêtes.
+text out (French), predicted with opus_mt_base:                       La répartition spatiale des femelles matures, des mâles prérecrus et exploitables et des petits crabes a été cartographiée et examinée à l'aide des taux de capture pour chaque ensemble de relevés.
+text out (French), predicted with opus_mt_finetuned:                  Les distributions spatiales des femelles matures, des prérecrues et des mâles exploitables, ainsi que des petits crabes ont été cartographiées et examinées à l'aide des taux de capture pour chaque ensemble de relevés.
+text out (French), predicted with m2m100_418m_base:                   Les distributions spatiales des femmes mûres, des hommes pré-recrutés et exploitables et des petits crab ont été cartographiées et examinées en utilisant des taux de capture pour chaque ensemble d'enquêtes.
+text out (French), predicted with m2m100_418m_finetuned:              Les distributions spatiales des femelles matures, des pré-recrues et des mâles exploitables ainsi que des petits crabes ont été cartographiées et examinées à l'aide des taux de capture pour chaque ensemble de relevés.
+text out (French), predicted with mbart50_mmt_base:                   La répartition spatiale des femelles adultes, des mâles prérecrutés et exploitables et des petits crabeaux a été mapped et examinée à l’aide de taux de capture pour chaque ensemble d’enquêtes.
+text out (French), predicted with mbart50_mmt_finetuned:              Les distributions spatiales des femelles matures, des pré-recrues et des mâles exploitables, ainsi que des petits crabes ont été cartographies et examinées à l'aide de taux de prises pour chaque ensemble de relevés.
+
+[sample 11/20] French
+text in (French):                                                     Aucune étude détaillée n'a été faite sur les captures de cette espèce dans le relevé général sur le flétan à des fins de comparaison
+text out (English), expected:                                         No detailed study has been made of catches of the species in the general Halibut survey for comparison
+text out (English), predicted with nllb_3b_base_researchonly:         No detailed study of the catches of this species has been made in the general statement on halibut for comparison purposes
+text out (English), predicted with opus_mt_base:                      No detailed study of the catches of this species has been made in the general survey of halibut for comparison purposes.
+text out (English), predicted with opus_mt_finetuned:                 No detailed studies were conducted on the catches of this species in the general survey on halibut for comparison purposes.
+text out (English), predicted with m2m100_418m_base:                  No detailed study was made on the captures of this species in the general report on the halibut for comparison purposes.
+text out (English), predicted with m2m100_418m_finetuned:             There was no detailed study of catches of this species in the general survey on halibut for comparison purposes.
+text out (English), predicted with mbart50_mmt_base:                  No detailed study of this species has been conducted in the general report on halibut for comparison purposes
+text out (English), predicted with mbart50_mmt_finetuned:             No detailed studies were conducted on this species catch in the general survey on halibut for comparison purposes.
+
+	preprocessing text
+	Aucune étude détaillée n'a été faite sur les captures de cette espèce dans le relevé général sur le flétan à des fins de comparaison
+	Aucune étude détaillée n'a été faite sur les captures de cette espèce dans le relevé général sur le __SPECIES_001__ à des fins de comparaison
+	postprocessing text
+	No detailed studies were conducted on this species catch in the general survey on __SPECIES_001__ for comparison purposes.
+	No detailed studies were conducted on this species catch in the general survey on halibut for comparison purposes.
+
+[sample 12/20] English
+text in (English):                                                    Detailed defnitions of the input data and parameters are provided in the repository s README fle
+text out (French), expected:                                          Des défnitions détaillées des données et des paramètres d'entrée sont fournies dans le fchier README
+text out (French), predicted with nllb_3b_base_researchonly:          Des définitions détaillées des données d'entrée et des paramètres sont fournies dans le fichier README du référentiel.
+text out (French), predicted with opus_mt_base:                       Des définitions détaillées des données d'entrée et des paramètres sont fournies dans le fichier README du dépôt.
+text out (French), predicted with opus_mt_finetuned:                  Les définitions détaillées des données et des paramètres d'entrée sont fournies dans le fichier README du référentiel.
+text out (French), predicted with m2m100_418m_base:                   Définitions détaillées des données d’entrée et des paramètres sont fournies dans le repository s README fle
+text out (French), predicted with m2m100_418m_finetuned:              Des défnitions détaillées des données d'entrée et des paramètres sont fournies dans la flotte README du stock.
+text out (French), predicted with mbart50_mmt_base:                   Des définitions détaillées des données d'entrée et des paramètres sont fournies dans le répertoire s README fle
+text out (French), predicted with mbart50_mmt_finetuned:              Des définitions détaillées des données d'entrée et des paramètres sont fournies dans le fichier README du répertoire.
+
+[sample 13/20] French
+text in (French):                                                     Scénario Description Explication Scénario 0 Modèle de base Modèle de projet sans mesure de gestion ou changement prévu des conditions : paramètres tirés de la distribution a posteriori commune estimée, variables environnementales et effets aléatoires tirés des distributions observées dans les 12 dernières années (de 2010 à 2022) Scénario 1 Hausse de 10 de la température Même chose que pour le modèle de base, mais la température de l'eau dans le golfe augmente de 10 sur 100 ans (c.-à-d
+text out (English), expected:                                         Scenario Description Explanation Scenario 0 Base model Project model with no management action or expected change in conditions: parameters drawn from estimated joint posterior distribution, and environmental variables and random effects drawn from observed distributions over the most recent 12 years (2010-2022) Scenario 1 10 incr
+text out (English), predicted with nllb_3b_base_researchonly:         Scenario Description Explanation Scenario 0 Base model Project model with no management measure or expected change in conditions: parameters derived from the estimated common a posteriori distribution, environmental variables and random effects derived from the distributions observed in the last 12 years (from 2010 to 2022) Scenario 1 Temperature increase of 10 Same as for the base model, but the water temperature in the Gulf increases by 10 over 100 years (i.e.
+text out (English), predicted with opus_mt_base:                      Scenario Description Explanation Scenario 0 Base Model Project Model Without Management Measure or Expected Change in Conditions: Parameters from Estimated Post-Common Distribution, Environmental Variables, and Random Effects from Distributions Observed in the Past 12 Years (2010 to 2022) Scenario 1 Temperature Increased by 10 Same as Base Model, but Gulf Water Temperature Increased by 10 over 100 Years (i.e.
+text out (English), predicted with opus_mt_finetuned:                 Scenario Description Explanation Scenario 0 Base Model Project model without management measure or predicted change in conditions: parameters from the estimated common posterior distribution, environmental variables, and random effects from distributions observed in the last 12 years (2010 to 2022) Scenario 1 10 increase in temperature Same as for the base model, but water temperature in the Gulf increases by 10 over 100 years (i.e.
+text out (English), predicted with m2m100_418m_base:                  Scenario Description Scenario 0 Basic Model Project Model without measurement of management or predicted change of conditions: parameters drawn from the distribution a posteriori common estimated, environmental variables and random effects drawn from the distribution observed in the last 12 years (from 2010 to 2022) Scenario 1 Temperature rise by 10 The same thing as for the basic model, but the water temperature in the Gulf increases by 10 out of 100 years (i.e.
+text out (English), predicted with m2m100_418m_finetuned:             Scenario Description Explanation Scenario 0 Basic Model Project model without management measures or predicted change in conditions: parameters from the estimated common posterior distribution, environmental variables, and random effects from the distribution observed over the last 12 years (from 2010 to 2022) Scenario 1 Temperature increase by 10 The same as for the base model, but water temperature in the Gulf increases by 10 over 100 years (e.g.
+text out (English), predicted with mbart50_mmt_base:                  Scenario Description Explanation Scenario 0 Base Model Project model without management measurement or anticipated change in conditions: parameters derived from estimated common a posteriori distribution, environmental variables and random effects derived from distributions observed in the last 12 years (2010 to 2022) Scenario 1 Temperature increase of 10 Same as for the base model, but the water temperature in the Gulf increases by 10 per 100 years (i.e.
+text out (English), predicted with mbart50_mmt_finetuned:             Scenario Description Explanation Scenario 0 Base model Project model with no management measure or expected change in conditions: parameters from the estimated common posterior distribution, environmental variables, and random effects from distributions observed in the last 12 years (2010 to 2022) Scenario 1 10 increase in temperature Same as for the base model, but the Gulf water temperature increases 10 over 100 years (i.e.
+
+[sample 14/20] English
+text in (English):                                                    INTRODUCTION Wild anadromous Atlantic salmon populations have been in decline throughout their native range over the past three decades, in large part as a result of poor marine survival (DFO 2008; Jones et al
+text out (French), expected:                                          INTRODUCTION Au cours des trois dernières décennies, les populations de saumon atlantique anadrome sauvage ont connu un déclin dans leur aire de répartition indigène, en grande partie en raison d'une faible survie en mer (MPO, 2008; Jones et coll., 2018)
+text out (French), predicted with nllb_3b_base_researchonly:          INTRODUCTION Les populations de saumon sauvage anadrome de l'Atlantique ont diminué dans leur aire de répartition naturelle au cours des trois dernières décennies, en grande partie en raison de la faible survie marine (DFO 2008; Jones et al.
+text out (French), predicted with opus_mt_base:                       INTRODUCTION Les populations de saumons atlantiques anadromes sauvages ont connu un déclin dans l'ensemble de leur aire de répartition indigène au cours des trois dernières décennies, en grande partie en raison de leur faible survie en mer (MPO, 2008; Jones et al., 2008).
+text out (French), predicted with opus_mt_finetuned:                  INTRODUCTION Les populations de saumons atlantiques anadromes sauvages ont connu un déclin dans l'ensemble de leur aire de répartition indigène au cours des trois dernières décennies, en grande partie en raison de la faible survie en mer (MPO 2008; Jones et al., 2008b).
+text out (French), predicted with m2m100_418m_base:                   INTRODUCTION Les populations de salmon atlantique anadrome sauvages ont diminué au cours de leur gamme indigène au cours des trois dernières décennies, en grande partie en raison de la mauvaise survie marine (DFO 2008; Jones et al).
+text out (French), predicted with m2m100_418m_finetuned:              INTRODUCTION Les populations de saumon atlantique sauvage anadrome ont diminué au cours des trois dernières décennies, en grande partie en raison de la faible survie en mer (MPO 2008; Jones et coll.
+text out (French), predicted with mbart50_mmt_base:                   INTRODUCTION Au cours des trois dernières décennies, les populations de saumon atlantique anadrome sauvage ont diminué dans l’ensemble de leur aire de répartition, en grande partie à cause de la faible survie marine (MPO 2008; Jones et al.
+text out (French), predicted with mbart50_mmt_finetuned:              INTRODUCTION Au cours des trois dernières décennies, les populations de saumon atlantique sauvage anadrome ont connu un déclin dans l'ensemble de leur aire de répartition indigène, en grande partie en raison de la faible survie en mer (MPO 2008; Jones et coll.
+
+[sample 15/20] English
+text in (English):                                                    Approximate locations of each of these areas are provided in Figure 8
+text out (French), expected:                                          La figure 8 présente l'emplacement approximatif de chacune de ces zones
+text out (French), predicted with nllb_3b_base_researchonly:          L'emplacement approximatif de chacune de ces zones est indiqué sur la figure 8.
+text out (French), predicted with opus_mt_base:                       Les emplacements approximatifs de chacun de ces secteurs sont présentés à la figure 8.
+text out (French), predicted with opus_mt_finetuned:                  Les emplacements approximatifs de chacune de ces zones sont fournis à la figure 8.
+text out (French), predicted with m2m100_418m_base:                   Les locations approximatives de chacune de ces zones sont indiquées dans la Figure 8
+text out (French), predicted with m2m100_418m_finetuned:              Les emplacements approximatifs de chacune de ces zones sont indiqués à la Figure 8
+text out (French), predicted with mbart50_mmt_base:                   Les emplacements approximatifs de chacun de ces secteurs sont indiqués à la figure 8.
+text out (French), predicted with mbart50_mmt_finetuned:              Les emplacements approximatifs de chacune de ces zones sont fournis à la figure 8
+
+[sample 16/20] French
+text in (French):                                                     Des relevés de navires de recherche montrent que l'abondance du loup atlantique dans la sous-zone 4 a augmenté au cours des années 90 en raison du grand nombre de petits poissons dans ce secteur
+text out (English), expected:                                         Research vessel surveys show that Atlantic wolffish in Sub-area 4 have increased in abundance through the 1990's
+text out (English), predicted with nllb_3b_base_researchonly:         Surveys from research vessels show that the abundance of Atlantic wolf in Sub-area 4 increased during the 1990s due to the large number of small fish in this area
+text out (English), predicted with opus_mt_base:                      Research vessel surveys show that the abundance of Atlantic Wolffish in Subarea 4 increased during the 1990s due to the large number of small fish in this area.
+text out (English), predicted with opus_mt_finetuned:                 Research vessel surveys show that the abundance of Atlantic Wolffish in Subarea 4 increased during the 1990s due to the large number of small fish in this area.
+text out (English), predicted with m2m100_418m_base:                  Research ships reports show that the abundance of the Atlantic wolf in subzone 4 increased during the 1990s due to the large number of small fish in this sector
+text out (English), predicted with m2m100_418m_finetuned:             Research vessel surveys show that the abundance of Atlantic Wolffish in Subarea 4 increased in the 1990s due to the large number of small fish in this area.
+text out (English), predicted with mbart50_mmt_base:                  Research vessel surveys show that the abundance of Atlantic wolf in Subzone 4 increased during the 1990s due to the large number of small fish in this area.
+text out (English), predicted with mbart50_mmt_finetuned:             Research vessel surveys show that the abundance of Atlantic Wolffish in Subarea 4 increased during the 1990s due to the large number of small fish in this area.
+
+[sample 17/20] French
+text in (French):                                                     Néanmoins, on a indiqué qu il serait utile d'illustrer dans le graphique l'ajustement de l'oscillation, mais sans y inclure le relevé de 2009
+text out (English), expected:                                         It was nevertheless commented that it would be useful to show the graph with the oscillating fit but not using the 2009 survey
+text out (English), predicted with nllb_3b_base_researchonly:         Nevertheless, it was suggested that it would be useful to illustrate in the graph the adjustment of the oscillation, but without including the 2009 survey.
+text out (English), predicted with opus_mt_base:                      Nevertheless, it was indicated that it would be useful to illustrate in the graph the adjustment of the oscillation, but not to include the 2009 survey.
+text out (English), predicted with opus_mt_finetuned:                 Nevertheless, it was indicated that it would be useful to illustrate the oscillation fit in the graph, but without including the 2009 survey.
+text out (English), predicted with m2m100_418m_base:                  However, it was indicated that it would be useful to illustrate in the graph the oscillation adjustment, but without including the 2009 report.
+text out (English), predicted with m2m100_418m_finetuned:             Nevertheless, it was noted that it would be useful to illustrate the oscillation fit in the graph, but not include the 2009 survey.
+text out (English), predicted with mbart50_mmt_base:                  Nonetheless, it was indicated that it would be useful to illustrate the adjustment of oscillation in the graph, but without including the 2009 survey.
+text out (English), predicted with mbart50_mmt_finetuned:             Nonetheless, it was suggested that it would be useful to illustrate the oscillation fit in the graph, but without including the 2009 survey.
+
+[sample 18/20] English
+text in (English):                                                    1 INTRODUCTION Fisheries and Oceans Canada (DFO) Science was asked to assess the recovery potential of Purple Wartyback in Canada
+text out (French), expected:                                          1 INTRODUCTION On a demandé aux Sciences de Pêches et Océans Canada (MPO) d'évaluer le potentiel de rétablissement de la mulette verruqueuse au Canada
+text out (French), predicted with nllb_3b_base_researchonly:          1 INTRODUCTION Pêches et Océans Canada (FPO) La science a été invitée à évaluer le potentiel de rétablissement de la baleine à bosse pourpre au Canada
+text out (French), predicted with opus_mt_base:                       1 INTRODUCTION Pêches et Océans Canada (MPO) On a demandé à Science d'évaluer le potentiel de rétablissement de l'espèce au Canada
+text out (French), predicted with opus_mt_finetuned:                  1 INTRODUCTION Les Sciences de Pêches et Océans Canada (MPO) ont été invités à évaluer le potentiel de rétablissement de l'omble verruqueux violet au Canada.
+text out (French), predicted with m2m100_418m_base:                   1 INTRODUCTION La pêche et les océans Canada (DFO) Science a été invité à évaluer le potentiel de récupération de Purple Wartyback au Canada
+text out (French), predicted with m2m100_418m_finetuned:              1 INTRODUCTION Pêches et Océans Canada (MPO) On demande aux Sciences d'évaluer le potentiel de rétablissement de l'anguille purpure au Canada.
+text out (French), predicted with mbart50_mmt_base:                   1 INTRODUCTION Pêches et Océans Canada (MPO) Les scientifiques ont été invités à évaluer le potentiel de récupération de la tortue rouge au Canada
+text out (French), predicted with mbart50_mmt_finetuned:              1 INTRODUCTION Pêches et Océans Canada (MPO) Les sciences ont été invitées à évaluer le potentiel de rétablissement du méné long au Canada
+
+[sample 19/20] French
+text in (French):                                                     DISCUSSION Gestion des océans du MPO a précisé que la réunion n'a pas pour but de mettre à jour l'Énoncé des pratiques canadiennes
+text out (English), expected:                                         DISCUSSION DFO Oceans Management clarified that this meeting is not meant to update the SOCP
+text out (English), predicted with nllb_3b_base_researchonly:         The meeting was not intended to update the Statement of Canadian Practices
+text out (English), predicted with opus_mt_base:                      DISCUSSION Oceans Management of DFO clarified that the meeting is not intended to update the Statement of Canadian Practices
+text out (English), predicted with opus_mt_finetuned:                 DISCUSSION Oceans Management of DFO clarified that the meeting is not intended to update the Statement of Canadian Practice
+text out (English), predicted with m2m100_418m_base:                  Discussions Ocean Management of DFO specified that the meeting does not aim to update the Declaration of Canadian Practices
+text out (English), predicted with m2m100_418m_finetuned:             DISCUSSION Ocean Management at DFO clarified that the meeting was not intended to update the Declaration of Canadian Practices.
+text out (English), predicted with mbart50_mmt_base:                  DISCUSSION Oceans Management of DFO stated that the meeting was not intended to update the Statement of Canadian Practices
+text out (English), predicted with mbart50_mmt_finetuned:             DISCUSSION DFO Oceans Management clarified that the purpose of the meeting was not to update the Statement of Canadian Practice.
+
+	preprocessing text
+	DISCUSSION Gestion des océans du MPO a précisé que la réunion n'a pas pour but de mettre à jour l'Énoncé des pratiques canadiennes
+	DISCUSSION Gestion des océans du __ACRONYMS_001__ a précisé que la réunion n'a pas pour but de mettre à jour l'Énoncé des pratiques canadiennes
+	postprocessing text
+	DISCUSSION __ACRONYMS_001__ Oceans Management clarified that the purpose of the meeting was not to update the Statement of Canadian Practice.
+	DISCUSSION DFO Oceans Management clarified that the purpose of the meeting was not to update the Statement of Canadian Practice.
+
+[sample 20/20] English
+text in (English):                                                    The effects of riparian vegetation removal on stream temperature and morphology are well documented (Quigley and Hinch 2006; Richter and Kolmes 2005)
+text out (French), expected:                                          Les effets de l'enlèvement de la végétation riveraine sur la température et la morphologie des cours d'eau sont bien documentés (Quigley et Hinch 2006; Richter et Kolmes 2005)
+text out (French), predicted with nllb_3b_base_researchonly:          Les effets de l'élimination de la végétation riveraine sur la température et la morphologie des cours d'eau sont bien documentés (Quigley et Hinch 2006; Richter et Kolmes 2005)
+text out (French), predicted with opus_mt_base:                       Les effets de l’enlèvement de la végétation riveraine sur la température et la morphologie des cours d’eau sont bien documentés (Quigley et Hinch, 2006; Richter et Kolmes, 2005).
+text out (French), predicted with opus_mt_finetuned:                  Les effets de l'enlèvement de la végétation riveraine sur la température et la morphologie des cours d'eau sont bien documentés (Quigley et Hinch 2006; Richter et Kolmes 2005).
+text out (French), predicted with m2m100_418m_base:                   Les effets de l'élimination de la végétation riparienne sur la température et la morphologie du flux sont bien documentés (Quigley et Hinch 2006; Richter et Kolmes 2005)
+text out (French), predicted with m2m100_418m_finetuned:              Les effets de l'élimination de la végétation riveraine sur la température et la morphologie des cours d'eau sont bien documentés (Quigley et Hinch 2006; Richter et Kolmes 2005)
+text out (French), predicted with mbart50_mmt_base:                   Les effets de l'élimination de la végétation riveraine sur la température et la morphologie des cours d'eau sont bien documentés (Quigley et Hinch 2006; Richter et Kolmes 2005)
+text out (French), predicted with mbart50_mmt_finetuned:              Les effets de l'enlèvement de la végétation riveraine sur la température et la morphologie des cours d'eau sont bien documentés (Quigley et Hinch 2006; Richter et Kolmes 2005)
+
+Loading embedder...
+
+Loading checkpoint shards: 100%|██████████| 3/3 [00:03<00:00,  1.32s/it]
+
+[sample 1/20] French
+text in (French):                                                     Maintenir la structure et la fonction actuelles du milieu marin côtier et littoral (par exemple, charge sédimentaire, évolution de la répartition des espèces).
+text out (English), expected:                                         to maintain current structure and function of the nearshore coastal marine environment (e.g., sediment loading, species distribution changes).
+text out (English), predicted with nllb_3b_base_researchonly:         Maintain the current structure and function of the coastal and littoral marine environment (e.g. sediment load, evolution of species distribution).
+text out (English), predicted with opus_mt_base:                      Maintain the current structure and function of the coastal and coastal marine environment (e.g. sediment loading, changing species distribution).
+text out (English), predicted with opus_mt_finetuned:                 Maintain the current structure and function of the coastal and nearshore marine environment (e.g., sediment loading, species distribution change).
+text out (English), predicted with m2m100_418m_base:                  Maintain the current structure and function of the coastal and coastal sea environment (e.g., sedimentary load, evolution of the distribution of species).
+text out (English), predicted with m2m100_418m_finetuned:             Maintain the current structure and function of the coastal and coastal marine environment (e.g., sedimental loading, change in species distribution).
+text out (English), predicted with mbart50_mmt_base:                  Maintain the current structure and function of the coastal and coastal marine environment (e.g. sedimentary load, evolution of species distribution).
+text out (English), predicted with mbart50_mmt_finetuned:             Maintain the current structure and function of the coastal and coastal marine environment (e.g., sedimentary loading, evolution of species distribution).
+
+[sample 2/20] English
+text in (English):                                                    The sequence of the indicators reflects the degree of similarity in their temporal dynamics.
+text out (French), expected:                                          La séquence des indicateurs reflète le degré de similitude de leur dynamique temporelle.
+text out (French), predicted with nllb_3b_base_researchonly:          La séquence des indicateurs reflète le degré de similitude de leur dynamique temporelle.
+text out (French), predicted with opus_mt_base:                       La séquence des indicateurs reflète le degré de similitude de leur dynamique temporelle.
+text out (French), predicted with opus_mt_finetuned:                  La séquence des indicateurs reflète le degré de similitude de leur dynamique temporelle.
+text out (French), predicted with m2m100_418m_base:                   La séquence des indicateurs reflète le degré de similitude dans leur dynamique temporelle.
+text out (French), predicted with m2m100_418m_finetuned:              La séquence des indicateurs reflète le degré de similitude dans leur dynamique temporelle.
+text out (French), predicted with mbart50_mmt_base:                   La séquence des indicateurs reflète le degré de similitude de leur dynamique temporelle.
+text out (French), predicted with mbart50_mmt_finetuned:              La séquence des indicateurs reflète le degré de similitude de leur dynamique temporelle.
+
+[sample 3/20] English
+text in (English):                                                    Inherent uncertainty is considerable and notably models produced asymmetrical, with credible intervals extending considerably higher than median estimates for SMSY and SMSR.
+text out (French), expected:                                          L incertitude inhérente est considérable et les modèles produits sont asymétriques, les intervalles de crédibilité s'étendant considérablement plus haut que les estimations médianes pour GRMD et Gmax.
+text out (French), predicted with nllb_3b_base_researchonly:          L'incertitude inhérente est considérable et, en particulier, les modèles produits sont asymétriques, avec des intervalles crédibles considérablement plus élevés que les estimations médianes pour les SMSY et les SMSR.
+text out (French), predicted with opus_mt_base:                       L'incertitude inhérente est considérable et notamment les modèles produits asymétriques, avec des intervalles crédibles s'étendant considérablement plus haut que les estimations médianes pour SMSY et SMSR.
+text out (French), predicted with opus_mt_finetuned:                  L incertitude inhérente est considérable et, notamment, les modèles ont produit une incertitude asymétrique, les intervalles crédibles s'étendant considérablement plus haut que les estimations médianes pour SMSY et SMSR.
+text out (French), predicted with m2m100_418m_base:                   L'incertitude inhérente est considérable et les modèles notables sont asymétriques, avec des intervalles crédibles qui s'étendent considérablement plus élevés que les estimations moyennes pour SMSY et SMSR.
+text out (French), predicted with m2m100_418m_finetuned:              L incertitude inhérente est considérable et surtout les modèles produits sont asymétriques, avec des intervalles crédibles qui s'étendent considérablement plus élevés que les estimations médianes pour l'OMS et l'OMS.
+text out (French), predicted with mbart50_mmt_base:                   L'incertitude inhérente est considérable et, en particulier, les modèles produits sont asymétriques, les intervalles crédibles s'étendant considérablement plus élevés que les estimations médianes pour le SMSY et le SMSR.
+text out (French), predicted with mbart50_mmt_finetuned:              L incertitude inhérente est considérable et, en particulier, les modèles produits sont asymétriques, les intervalles crédibles s'étendant considérablement plus élevés que les estimations médianes pour SMSY et SMSR.
+
+[sample 4/20] French
+text in (French):                                                     Nous soulignons les difficultés particulières associées à l'incertitude et à la représentativité des données plus loin dans cette section ainsi que dans la section Discussion du présent document.
+text out (English), expected:                                         We highlight specific challenges associated with uncertainty and representativeness of data further on in this section, as well as within the Discussion section of this report.
+text out (English), predicted with nllb_3b_base_researchonly:         We highlight the particular difficulties associated with the uncertainty and representativeness of data later in this section as well as in the Discussion section of this document.
+text out (English), predicted with opus_mt_base:                      We highlight the particular difficulties associated with the uncertainty and representativeness of data later in this section as well as in the Discussion section of this document.
+text out (English), predicted with opus_mt_finetuned:                 We highlight the particular challenges associated with uncertainty and representativeness of data later in this section as well as in the Discussion section of this document.
+text out (English), predicted with m2m100_418m_base:                  We highlight the particular difficulties associated with the uncertainty and representativity of the data further in this section as well as in the discussion section of this document.
+text out (English), predicted with m2m100_418m_finetuned:             We highlight the specific difficulties associated with the uncertainty and representativity of data further in this section as well as in the Discussion section of this document.
+text out (English), predicted with mbart50_mmt_base:                  We highlight the particular difficulties associated with the uncertainty and representativeness of data further in this section as well as in the Discussion section of this document.
+text out (English), predicted with mbart50_mmt_finetuned:             We highlight the specific difficulties associated with the uncertainty and representativeness of data further in this section as well as in the Discussion section of this document.
+
+	preprocessing text
+	Nous soulignons les difficultés particulières associées à l'incertitude et à la représentativité des données plus loin dans cette section ainsi que dans la section Discussion du présent document.
+	Nous soulignons les difficultés particulières associées à l'incertitude et à la représentativité des __TECHNICAL_001__ plus loin dans cette section ainsi que dans la section Discussion du présent document.
+	postprocessing text
+	We highlight the specific difficulties associated with the uncertainty and representativeness of __TECHNICAL_001__ further in this section as well as in the Discussion section of this document.
+	We highlight the specific difficulties associated with the uncertainty and representativeness of data further in this section as well as in the Discussion section of this document.
+
+[sample 5/20] French
+text in (French):                                                     Les pétoncles d'âge 5 constituent 42 de la biomasse ciblée.
+text out (English), expected:                                         Age 5 scallops are contributing 42 of the targeted biomass.
+text out (English), predicted with nllb_3b_base_researchonly:         The 5-year-old petals make up 42 of the targeted biomass.
+text out (English), predicted with opus_mt_base:                      Age 5 scallops make up 42 of the targeted biomass.
+text out (English), predicted with opus_mt_finetuned:                 Age 5 scallops make up 42 of the targeted biomass.
+text out (English), predicted with m2m100_418m_base:                  The 5-year-old petoncles make up 42 of the targeted biomass.
+text out (English), predicted with m2m100_418m_finetuned:             Age 5 scallops are 42 of the targeted biomass.
+text out (English), predicted with mbart50_mmt_base:                  Age 5 petoncles constitute 42 of the biomass targeted.
+text out (English), predicted with mbart50_mmt_finetuned:             Age 5 scallops account for 42 of the biomass target.
+
+	preprocessing text
+	Les pétoncles d'âge 5 constituent 42 de la biomasse ciblée.
+	Les pétoncles d'âge 5 constituent 42 de la __TECHNICAL_001__ ciblée.
+	postprocessing text
+	Age 5 scallops account for 42 of the __TECHNICAL_001__ target.
+	Age 5 scallops account for 42 of the biomass target.
+
+[sample 6/20] French
+text in (French):                                                     Dans une étude récente, on a montré que des pêcheurs récréatifs préféraient utiliser une pince fixée à la mâchoire inférieure et comportant un dispositif de remise à l'eau avec capteur de pression, la caisse à homards pondérée étant la deuxième méthode de prédilection.
+text out (English), expected:                                         A recent study showed that recreational fishers preferred using the lower jaw clamp with pressure sensor release, with the weighted crate being the second preference.
+text out (English), predicted with nllb_3b_base_researchonly:         In a recent study it was shown that recreational fishermen preferred to use a lower jaw-mounted clamp with a pressure-sensing release device, with the weighted lobster cage being the second preferred method.
+text out (English), predicted with opus_mt_base:                      In a recent study, recreational fishers have been shown to prefer to use a clamp attached to the lower jaw and incorporating a re-launch device with pressure sensor, with the weighted lobster box being the second preferred method.
+text out (English), predicted with opus_mt_finetuned:                 In a recent study, it was shown that recreational fishers preferred to use a clamp attached to the lower jaw and featuring a release device with pressure sensor, with the weighted lobster box being the second preferred method.
+text out (English), predicted with m2m100_418m_base:                  In a recent study, it has been shown that recreational fishermen prefer to use a pince attached to the lower wrist and containing a water removal device with a pressure sensor, the weighing shell box being the second preferred method.
+text out (English), predicted with m2m100_418m_finetuned:             In a recent study, it has been shown that recreational fishers prefer to use a lower-mashed pince with a release device with a pressure sensor, with the weighted lobster box being the second preferred method.
+text out (English), predicted with mbart50_mmt_base:                  A recent study showed that recreational fishermen preferred to use a brush attached to the lower jaw and fitted with a pressure sensor release device, with the weighted lobster cage being the second preferred method.
+text out (English), predicted with mbart50_mmt_finetuned:             A recent study showed that recreational fishermen preferred to use a bottom-mesh-mounted clamp with a pressure sensor, with the weighted lobster cage being the second preferred method.
+
+[sample 7/20] English
+text in (English):                                                    7.7 Sensitive Areas 7.7.2 Effects Assessment The EA evaluates the activities of the project which can interact with previously identified sensitive areas (see map 5.57).
+text out (French), expected:                                          7.7 Zones sensibles 7.7.2 Évaluation des impacts L'évaluation environnementale évalue les activités du projet qui peuvent interagir avec des zones sensibles déjà définies (voir la carte 5.57).
+text out (French), predicted with nllb_3b_base_researchonly:          7.7 Zones sensibles 7.7.2 Évaluation des effets L'EA évalue les activités du projet qui peuvent interagir avec les zones sensibles précédemment identifiées (voir carte 5.57).
+text out (French), predicted with opus_mt_base:                       7.7 Zones sensibles 7.7.2 Évaluation des effets L'EE évalue les activités du projet qui peuvent interagir avec les zones sensibles précédemment identifiées (voir la carte 5.57).
+text out (French), predicted with opus_mt_finetuned:                  7.7 Zones sensibles 7.7.2 Évaluation des effets L'évaluation environnementale évalue les activités du projet qui peuvent interagir avec les zones sensibles précédemment identifiées (voir la carte 5.57).
+text out (French), predicted with m2m100_418m_base:                   7.7 Areas sensibles 7.7.2 Évaluation des effets L'EA évalue les activités du projet qui peuvent interagir avec les zones sensibles précédemment identifiées (voir la carte 5.57).
+text out (French), predicted with m2m100_418m_finetuned:              7.7 Zones sensibles 7.7.2 Évaluation des effets L'EA évalue les activités du projet qui peuvent interagir avec les zones sensibles désignées précédemment (voir la carte 5.57).
+text out (French), predicted with mbart50_mmt_base:                   7.7 Zones sensibles 7.7.2 Évaluation des effets L'EE évalue les activités du projet qui peuvent interagir avec des zones sensibles précédemment identifiées (voir la carte 5.57).
+text out (French), predicted with mbart50_mmt_finetuned:              7.7 Zones sensibles 7.7.2 Évaluation des effets L'évaluation environnementale évalue les activités du projet qui peuvent interagir avec les zones sensibles précédemment identifiées (voir la carte 5.57).
+
+[sample 8/20] English
+text in (English):                                                    Additional publications from this meeting will be posted on the Fisheries and Oceans Canada (DFO) Science Advisory Schedule as they become available.
+text out (French), expected:                                          Toute autre publication découlant de cette réunion sera publiée, lorsqu elle sera disponible, sur le calendrier des avis scientifiques de Pêches et Océans Canada.
+text out (French), predicted with nllb_3b_base_researchonly:          D'autres publications issues de cette réunion seront affichées sur le calendrier des avis scientifiques de Pêches et Océans Canada (PMO) à mesure qu'elles seront disponibles.
+text out (French), predicted with opus_mt_base:                       D'autres publications de cette réunion seront affichées sur le calendrier des avis scientifiques de Pêches et Océans Canada (MPO) dès qu'elles seront disponibles.
+text out (French), predicted with opus_mt_finetuned:                  Toute autre publication découlant de cette réunion sera publiée, lorsqu elle sera disponible, sur le calendrier des avis scientifiques de Pêches et Océans Canada.
+text out (French), predicted with m2m100_418m_base:                   Des publications supplémentaires de cette réunion seront publiées sur le calendrier scientifique de la pêche et des océans Canada (DFO) à mesure qu’elles deviennent disponibles.
+text out (French), predicted with m2m100_418m_finetuned:              Toute autre publication découlant de cette réunion sera publiée, lorsqu elle sera disponible, sur le calendrier des avis scientifiques de Pêches et Océans Canada (MPO).
+text out (French), predicted with mbart50_mmt_base:                   Les publications additionnelles de cette réunion seront affichées sur le Calendrier consultatif scientifique de Pêches et Océans Canada (MPO) dès qu'elles seront disponibles.
+text out (French), predicted with mbart50_mmt_finetuned:              Toute autre publication découlant de cette réunion sera publiée, lorsqu elle sera disponible, sur le calendrier des avis scientifiques de Pêches et Océans Canada (MPO).
+
+[sample 9/20] French
+text in (French):                                                     Les eaux de surface (2 m) demeurent à 13 C ou plus de plus en plus longtemps sur la série temporelle.
+text out (English), expected:                                         The length of time surface waters (2 m) remain at 13 C or higher continues to expand over the time series.
+text out (English), predicted with nllb_3b_base_researchonly:         Surface water (2 m) stays at 13 C or higher longer and longer over the time series.
+text out (English), predicted with opus_mt_base:                      Surface waters (2 m) remain at 13 C or longer over the time series.
+text out (English), predicted with opus_mt_finetuned:                 Surface waters (2 m) remain at 13 C or longer over the time series.
+text out (English), predicted with m2m100_418m_base:                  Surface waters (2 m) remain at 13 C or more longer on the time series.
+text out (English), predicted with m2m100_418m_finetuned:             Surface waters (2 m) remain at 13 C or longer over the time series.
+text out (English), predicted with mbart50_mmt_base:                  Surface water (2 m) remains at 13 C or higher for more and more time on the time series.
+text out (English), predicted with mbart50_mmt_finetuned:             Surface water (2 m) remains at or above 13 C for an increasingly long time on the time series.
+
+[sample 10/20] English
+text in (English):                                                    These include clogging of the filter and smothering of the inhalant pores.
+text out (French), expected:                                          Ces effets comprennent l'obstruction du filtre et l'étouffement des pores inhalants.
+text out (French), predicted with nllb_3b_base_researchonly:          Il s'agit notamment de l' obstruction du filtre et de l' obstruction des pores de l' inhalateur.
+text out (French), predicted with opus_mt_base:                       Ceux-ci comprennent le colmatage du filtre et l'étouffement des pores inhalants.
+text out (French), predicted with opus_mt_finetuned:                  Il s'agit notamment du colmatage du filtre et de l'étouffement des pores des inhalants.
+text out (French), predicted with m2m100_418m_base:                   Ceux-ci comprennent la fermeture du filtre et l'humidification des pores inhalées.
+text out (French), predicted with m2m100_418m_finetuned:              Il s'agit notamment de la clôturation du filtre et de la smotération des pores d'inhalation.
+text out (French), predicted with mbart50_mmt_base:                   Il s'agit notamment de bloquer le filtre et de smoter les pores d'inhalation.
+text out (French), predicted with mbart50_mmt_finetuned:              Il s'agit notamment de clover le filtre et de smoter les pores de l'inhalant.
+
+[sample 11/20] French
+text in (French):                                                     Les estimations de l'abondance de la morue dans 3NO ont été ajustées à l'échelle des estimations de 2J 3KL (nombre d'individus moyen par trait du relevé).
+text out (English), expected:                                         The 3NO cod abundance estimates were adjusted to the scale of the 2J 3KL estimates (survey mean numbers per tow).
+text out (English), predicted with nllb_3b_base_researchonly:         The estimates of the abundance of cod in 3NO have been adjusted to the scale of the estimates of 2J 3KL (mean number of individuals per _TECHNICAL_001__ of the survey).
+text out (English), predicted with opus_mt_base:                      The abundance estimates of cod in 3NO were adjusted to the scale of the estimates of 2J 3KL (average number of individuals per tow of the survey).
+text out (English), predicted with opus_mt_finetuned:                 The abundance estimates of cod in 3NO were adjusted to the scale of the estimates of 2J 3KL (average number of individuals per tow from the survey).
+text out (English), predicted with m2m100_418m_base:                  The estimates of the abundance of the cod in 3NO were adjusted to the scale of the estimates of 2J 3KL (the average number of individuals by tow of the report).
+text out (English), predicted with m2m100_418m_finetuned:             Estimates of abundance for cod in 3NO were adjusted to the scale of 2J 3KL estimates (mean number of individuals by tow from the survey).
+text out (English), predicted with mbart50_mmt_base:                  Estimates of cod abundance in 3NO were adjusted to the scale of estimates of 2J 3KL (average number of individuals by tow of the survey).
+text out (English), predicted with mbart50_mmt_finetuned:             Abundance estimates of cod in 3NO were adjusted to the scale of the 2J 3KL estimates (average number of individuals per tow from the survey).
+
+	preprocessing text
+	Les estimations de l'abondance de la morue dans 3NO ont été ajustées à l'échelle des estimations de 2J 3KL (nombre d'individus moyen par trait du relevé).
+	Les estimations de l'abondance de la __SPECIES_001__ dans 3NO ont été ajustées à l'échelle des estimations de 2J 3KL (nombre d'individus moyen par __TECHNICAL_001__ du relevé).
+	postprocessing text
+	Abundance estimates of __SPECIES_001__ in 3NO were adjusted to the scale of the 2J 3KL estimates (average number of individuals per __TECHNICAL_001__ from the survey).
+	Abundance estimates of cod in 3NO were adjusted to the scale of the 2J 3KL estimates (average number of individuals per tow from the survey).
+
+[sample 12/20] French
+text in (French):                                                     Toute autre publication découlant de cette réunion sera publiée, lorsqu elle sera disponible, sur le calendrier des avis scientifiques de Pêches et Océans Canada.
+text out (English), expected:                                         Additional publications from this meeting will be posted on the Fisheries and Oceans Canada (DFO) Science Advisory Schedule as they become available.
+text out (English), predicted with nllb_3b_base_researchonly:         Any other publications resulting from this meeting will be published, when available, on Fisheries and Oceans Canada's science advisory schedule.
+text out (English), predicted with opus_mt_base:                      Any other publications resulting from this meeting will be published, when available, on Fisheries and Oceans Canada's science advisory schedule.
+text out (English), predicted with opus_mt_finetuned:                 Additional publications from this meeting will be posted on Fisheries and Oceans Canada s science advisory schedule as they become available.
+text out (English), predicted with m2m100_418m_base:                  Any other publication resulting from this meeting will be published, when available, on the science advisory schedule of Fisheries and Oceans Canada.
+text out (English), predicted with m2m100_418m_finetuned:             Additional publications from this meeting will be posted on Fisheries and Oceans Canada s science advisory schedule as they become available.
+text out (English), predicted with mbart50_mmt_base:                  Any other publication resulting from this meeting will be published, when available, on the science advisory schedule of Fisheries and Oceans Canada.
+text out (English), predicted with mbart50_mmt_finetuned:             Additional publications from this meeting will be posted on science advisory schedule of Fisheries and Oceans Canada as they become available.
+
+	preprocessing text
+	Toute autre publication découlant de cette réunion sera publiée, lorsqu elle sera disponible, sur le calendrier des avis scientifiques de Pêches et Océans Canada.
+	Toute autre publication découlant de cette réunion sera publiée, lorsqu elle sera disponible, sur le __TECHNICAL_001__ de Pêches et Océans Canada.
+	postprocessing text
+	Additional publications from this meeting will be posted on __TECHNICAL_001__ of Fisheries and Oceans Canada as they become available.
+	Additional publications from this meeting will be posted on science advisory schedule of Fisheries and Oceans Canada as they become available.
+
+[sample 13/20] French
+text in (French):                                                     La présence des poissons combattants GloFishMD dans l'environnement canadien devrait être rare, isolée et éphémère.
+text out (English), expected:                                         The occurrence of GloFish Bettas in the Canadian environment is expected to be rare, isolated and ephemeral.
+text out (English), predicted with nllb_3b_base_researchonly:         The presence of GloFishMD combatant fish in the Canadian environment is expected to be rare, isolated and ephemeral.
+text out (English), predicted with opus_mt_base:                      The presence of GloFish combatants in the Canadian environment is expected to be rare, isolated and transient.
+text out (English), predicted with opus_mt_finetuned:                 The presence of GloFish combatants in the Canadian environment is expected to be rare, isolated, and ephemeral.
+text out (English), predicted with m2m100_418m_base:                  The presence of GloFishMD fighter fish in the Canadian environment should be rare, isolated and ephemary.
+text out (English), predicted with m2m100_418m_finetuned:             The presence of GloFish Fighting Fish in the Canadian environment is expected to be rare, isolated, and ephemeral.
+text out (English), predicted with mbart50_mmt_base:                  The presence of GloFish® fighting fish in the Canadian environment should be rare, isolated and ephemeral.
+text out (English), predicted with mbart50_mmt_finetuned:             The presence of GloFish fighting fish in the Canadian environment is expected to be rare, isolated, and ephemeral.
+
+[sample 14/20] English
+text in (English):                                                    POPULATION SIZE AND TRAJECTORY The size and trajectory of fish populations is highly important in determining the impacts of fish mortality on population abundance.
+text out (French), expected:                                          TAILLE ET TRAJECTOIRE DES POPULATIONS La taille et la trajectoire des populations de poissons sont très importantes pour déterminer les effets de la mortalité du poisson sur l'abondance des populations.
+text out (French), predicted with nllb_3b_base_researchonly:          La taille et la trajectoire des populations de poissons sont extrêmement importantes pour déterminer l'impact de la mortalité des poissons sur l'abondance des populations.
+text out (French), predicted with opus_mt_base:                       TAILLE ET TRAJECTOIRE DE LA POPULATION La taille et la trajectoire des populations de poissons sont très importantes pour déterminer les impacts de la mortalité des poissons sur l'abondance de la population.
+text out (French), predicted with opus_mt_finetuned:                  TAILLE ET TRAJECTOIRE DE LA POPULATION La taille et la trajectoire des populations de poissons sont très importantes pour déterminer les impacts de la mortalité des poissons sur l'abondance de la population.
+text out (French), predicted with m2m100_418m_base:                   La taille et la trajectoire des populations de poissons sont extrêmement importantes pour déterminer l’impact de la mortalité de poissons sur l’abondance de la population.
+text out (French), predicted with m2m100_418m_finetuned:              TRAJECTORIE DE LA POPULATION La taille et la trajectoire des populations de poissons sont très importantes pour déterminer les répercussions de la mortalité du poisson sur l'abondance de la population.
+text out (French), predicted with mbart50_mmt_base:                   SIZE ET trajectoire DE LA POPULATION La taille et la trajectoire des populations de poissons sont très importantes pour déterminer les répercussions de la mortalité des poissons sur l'abondance de la population.
+text out (French), predicted with mbart50_mmt_finetuned:              SIZE ET STRATÉGIE DE LA POPULATION La taille et la trajectoire des populations de poissons sont très importantes pour déterminer les répercussions de la mortalité du poisson sur l'abondance de la population.
+
+[sample 15/20] French
+text in (French):                                                     Dans le cadre d'un projet futur, il est proposé de collaborer avec la NOAA sur un rapport de synthèse des données du Pacifique Nord-Est combinant les données canadiennes et américaines.
+text out (English), expected:                                         One suggestion for a future project is to collaborate with NOAA on a Northeast Pacific data synopsis report, combining Canadian and US data.
+text out (English), predicted with nllb_3b_base_researchonly:         As part of a future project, it is proposed to collaborate with NOAA on a synthesis report of the Northeast Pacific data combining Canadian and US data.
+text out (English), predicted with opus_mt_base:                      As part of a future project, it is proposed to collaborate with NOAA on a synthesis report of the data of the Northeast Pacific combining the Canadian and American data.
+text out (English), predicted with opus_mt_finetuned:                 As part of a future project, it is proposed to collaborate with NOAA on a synthesis report of the Northeast Pacific data combining Canadian and American data.
+text out (English), predicted with m2m100_418m_base:                  As part of a future project, it is proposed to collaborate with NOAA on a summary report of the data of the North-Eastern Pacific combining the data Canadian and American.
+text out (English), predicted with m2m100_418m_finetuned:             As part of a future project, it is proposed to collaborate with NOAA on a summary report of the northeastern Pacific data combining Canadian and American data.
+text out (English), predicted with mbart50_mmt_base:                  As part of a future project, it is proposed to collaborate with NOAA on a Northeast Pacific data synthesis report combining Canadian and American data.
+text out (English), predicted with mbart50_mmt_finetuned:             As part of a future project, it is proposed to collaborate with NOAA on a Northeast Pacific data synthesis report combining Canadian and American data.
+
+	preprocessing text
+	Dans le cadre d'un projet futur, il est proposé de collaborer avec la NOAA sur un rapport de synthèse des données du Pacifique Nord-Est combinant les données canadiennes et américaines.
+	Dans le cadre d'un projet futur, il est proposé de collaborer avec la NOAA sur un rapport de synthèse des __TECHNICAL_002__ du Pacifique Nord-Est combinant les __TECHNICAL_001__ canadiennes et américaines.
+	postprocessing text
+	As part of a future project, it is proposed to collaborate with NOAA on a Northeast Pacific __TECHNICAL_002__ synthesis report combining Canadian and American __TECHNICAL_001__.
+	As part of a future project, it is proposed to collaborate with NOAA on a Northeast Pacific data synthesis report combining Canadian and American data.
+
+[sample 16/20] English
+text in (English):                                                    The base case scenario that represented the most plausible hypothesis for both productivity and fSSB2016.
+text out (French), expected:                                          Le scénario de référence représentait l'hypothèse la plus plausible à la fois pour la productivité et fSSB2016.
+text out (French), predicted with nllb_3b_base_researchonly:          Le scénario de base qui représentait l'hypothèse la plus plausible tant pour la productivité que pour l'exercice fSSB2016.
+text out (French), predicted with opus_mt_base:                       Le scénario de base qui représentait l'hypothèse la plus plausible pour la productivité et fSSB2016.
+text out (French), predicted with opus_mt_finetuned:                  Le scénario de référence qui représentait l'hypothèse la plus plausible pour la productivité et le fSSB2016.
+text out (French), predicted with m2m100_418m_base:                   Le scénario de cas de base qui représentait la hypothèse la plus plausible pour la productivité et fSSB2016.
+text out (French), predicted with m2m100_418m_finetuned:              Le scénario de référence qui représentait l'hypothèse la plus plausible pour la productivité et fSSB2016.
+text out (French), predicted with mbart50_mmt_base:                   Le scénario de base qui représentait l'hypothèse la plus plausible pour la productivité et fSSB2016.
+text out (French), predicted with mbart50_mmt_finetuned:              Le scénario de référence qui représentait l'hypothèse la plus plausible pour la productivité et fSSB2016.
+
+[sample 17/20] French
+text in (French):                                                     Bon nombre de ces mesures nécessitent la collecte d'information scientifique sur la situation actuelle de l'espèce sauvage, sur les menaces qui pèsent sur sa survie et son rétablissement et sur la faisabilité de son rétablissement.
+text out (English), expected:                                         Many of these actions require scientific information on the current status of the wildlife species, threats to its survival and recovery, and the feasibility of recovery.
+text out (English), predicted with nllb_3b_base_researchonly:         Many of these measures require the collection of scientific information on the current status of the wild species, the threats to its survival and _TECHNICAL_002__ and the feasibility of its _TECHNICAL_001__.
+text out (English), predicted with opus_mt_base:                      Many of these measures require the collection of scientific information on the current status of the wildlife species, the threats to its survival and recovery, and the feasibility of its recovery.
+text out (English), predicted with opus_mt_finetuned:                 Many of these actions require scientific information on the current status of the wildlife species, threats to its survival and recovery, and the feasibility of its recovery.
+text out (English), predicted with m2m100_418m_base:                  Many of these measures require the collection of scientific information on the current situation of the wild species, on the threats that weigh on its survival and its recovery and on the feasibility of its recovery.
+text out (English), predicted with m2m100_418m_finetuned:             Many of these measures require scientific information on the current status of the wildlife species, threats to its survival and recovery, and the feasibility of its recovery.
+text out (English), predicted with mbart50_mmt_base:                  Many of these measures require the collection of scientific information on the current status of the wildlife species, the threats to its survival and its recovery and the feasibility of its recovery.
+text out (English), predicted with mbart50_mmt_finetuned:             Many of these actions require scientific information on the current status of the wildlife species, threats to its survival and recovery, and the feasibility of its recovery.
+
+	preprocessing text
+	Bon nombre de ces mesures nécessitent la collecte d'information scientifique sur la situation actuelle de l'espèce sauvage, sur les menaces qui pèsent sur sa survie et son rétablissement et sur la faisabilité de son rétablissement.
+	Bon nombre de ces mesures nécessitent la collecte d'information scientifique sur la situation actuelle de l'espèce sauvage, sur les menaces qui pèsent sur sa survie et son __TECHNICAL_002__ et sur la faisabilité de son __TECHNICAL_001__.
+	postprocessing text
+	Many of these actions require scientific information on the current status of the wildlife species, threats to its survival and __TECHNICAL_002__, and the feasibility of its __TECHNICAL_001__.
+	Many of these actions require scientific information on the current status of the wildlife species, threats to its survival and recovery, and the feasibility of its recovery.
+
+[sample 18/20] English
+text in (English):                                                    Consensus Participants reached consensus on the following conclusion: The assessment concluded with negligible uncertainty that the GloFish Tetras have a negligible potential for hazards via hybridization with other fish.
+text out (French), expected:                                          Consensus Les participants parviennent à un consensus sur la conclusion suivante : L'évaluation permet de conclure, avec un niveau d'incertitude négligeable, que les tétras GloFishMD représentent un danger négligeable d'hybridation avec d'autres poissons.
+text out (French), predicted with nllb_3b_base_researchonly:          Consensus Les participants sont parvenus au consensus sur la conclusion suivante: l'évaluation a conclu avec une incertitude négligeable que le glofish tétras présente un potentiel négligeable de dangers par hybridation avec d'autres poissons.
+text out (French), predicted with opus_mt_base:                       Consensus Les participants sont parvenus à un consensus sur la conclusion suivante : L'évaluation a conclu avec une incertitude négligeable que les tétras de GloFish présentent un potentiel négligeable de dangers par hybridation avec d'autres poissons.
+text out (French), predicted with opus_mt_finetuned:                  Consensus Les participants sont parvenus à un consensus sur la conclusion suivante : L'évaluation conclut avec une incertitude négligeable que les tétras GloFishMD présentent un potentiel négligeable de dangers par l'hybridation avec d'autres poissons.
+text out (French), predicted with m2m100_418m_base:                   Les participants au consensus ont trouvé un consensus sur la conclusion suivante : l’évaluation a conclu avec une incertitude négligeable que les GloFish Tetras ont un potentiel négligeable pour les dangers par l’hybridisation avec d’autres poissons.
+text out (French), predicted with m2m100_418m_finetuned:              Consensus Les participants sont d'accord sur la conclusion suivante : L'évaluation a conclu avec une incertitude négligeable que les tétras GloFish présentent un potentiel négligeable de dangers par l'hybridation avec d'autres poissons.
+text out (French), predicted with mbart50_mmt_base:                   Consensus Les participants sont parvenus à un consensus sur la conclusion suivante : l'évaluation a conclu avec une incertitude négligeable que les Tetras GloFish présentent un risque négligeable d'hybridation avec d'autres poissons.
+text out (French), predicted with mbart50_mmt_finetuned:              Consensus Les participants sont parvenus à un consensus sur la conclusion suivante : L'évaluation a conclu avec une incertitude négligeable que les tétras GloFishMD présentent un potentiel négligeable de dangers par l'hybridation avec d'autres poissons.
+
+[sample 19/20] French
+text in (French):                                                     Consulter le texte pour obtenir des commentaires détaillés sur chaque menace et voir dans MPO (2014b) une description détaillée de chaque niveau de facteur dans le tableau.
+text out (English), expected:                                         Refer to the text for extensive comments on each threat and to DFO (2014b) for a detailed description of each factor level in the table.
+text out (English), predicted with nllb_3b_base_researchonly:         Refer to the text for detailed comments on each threat and see DFO (2014b) for a detailed description of each factor level in the table.
+text out (English), predicted with opus_mt_base:                      See the text for detailed comments on each threat and see DFO (2014b) for a detailed description of each factor level in the table.
+text out (English), predicted with opus_mt_finetuned:                 Refer to the text for detailed comments on each threat and see DFO (2014b) for a detailed description of each factor level in the table.
+text out (English), predicted with m2m100_418m_base:                  See the text to get detailed comments on each threat and see in DFO (2014b) a detailed description of each factor level in the table.
+text out (English), predicted with m2m100_418m_finetuned:             See the text for detailed comments on each threat and see in DFO (2014b) a detailed description of each factor level in the table.
+text out (English), predicted with mbart50_mmt_base:                  See the text for detailed comments on each threat and see DFO (2014b) for a detailed description of each factor level in the table.
+text out (English), predicted with mbart50_mmt_finetuned:             Refer to the text for detailed comments on each threat and see DFO (2014b) for a detailed description of each factor level in the table.
+
+	preprocessing text
+	Consulter le texte pour obtenir des commentaires détaillés sur chaque menace et voir dans MPO (2014b) une description détaillée de chaque niveau de facteur dans le tableau.
+	Consulter le texte pour obtenir des commentaires détaillés sur chaque menace et voir dans __ACRONYMS_001__ (2014b) une description détaillée de chaque niveau de facteur dans le tableau.
+	postprocessing text
+	Refer to the text for detailed comments on each threat and see __ACRONYMS_001__ (2014b) for a detailed description of each factor level in the table.
+	Refer to the text for detailed comments on each threat and see DFO (2014b) for a detailed description of each factor level in the table.
+
+[sample 20/20] French
+text in (French):                                                     Par conséquent, les évaluations de l'exposition environnementale pour le BZ2019 et le PZ2019 sont faibles, avec une incertitude faible qui est conforme aux lignées déjà déclarées.
+text out (English), expected:                                         Consequently, the environmental exposure assessments for BZ2019 and PZ2019 are low, with low uncertainty that is consistent with previously notified lines.
+text out (English), predicted with nllb_3b_base_researchonly:         Therefore, the environmentalexposureassessments for BZ2019 and PZ2019 are low, with a low uncertainty that is consistent with the lines already reported.
+text out (English), predicted with opus_mt_base:                      Therefore, the environmental assessments of exposure for BZ2019 and PZ2019 are low, with low uncertainty that is consistent with previously reported lines.
+text out (English), predicted with opus_mt_finetuned:                 Therefore, the environmental exposure assessments for BZ2019 and PZ2019 are low, with low uncertainty that is consistent with previously reported lines.
+text out (English), predicted with m2m100_418m_base:                  Therefore, the environmental assessments of theexposure for the BZ2019 and the PZ2019 are low, with a low uncertainty that is in line with the already declared lines.
+text out (English), predicted with m2m100_418m_finetuned:             Therefore, environmentalexposure assessments for BZ2019 and PZ2019 are low, with low uncertainty that is consistent with the lines already.
+text out (English), predicted with mbart50_mmt_base:                  Consequently, the environmental assessments of exposure for BZ2019 and PZ2019 are low, with a low uncertainty that is consistent with the already reported lines.
+text out (English), predicted with mbart50_mmt_finetuned:             Consequently, environmental exposure assessments for BZ2019 and PZ2019 are low, with low uncertainty that is consistent with previously reported lines.
+
+	preprocessing text
+	Par conséquent, les évaluations de l'exposition environnementale pour le BZ2019 et le PZ2019 sont faibles, avec une incertitude faible qui est conforme aux lignées déjà déclarées.
+	Par conséquent, les évaluations de l'__TECHNICAL_001__ environnementale pour le BZ2019 et le PZ2019 sont faibles, avec une incertitude faible qui est conforme aux lignées déjà déclarées.
+	postprocessing text
+	Consequently, environmental __TECHNICAL_001__ assessments for BZ2019 and PZ2019 are low, with low uncertainty that is consistent with previously reported lines.
+	Consequently, environmental exposure assessments for BZ2019 and PZ2019 are low, with low uncertainty that is consistent with previously reported lines.
