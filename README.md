@@ -38,7 +38,7 @@ This phase produced several fine-tuned translation models optimised for CSAS sci
 
 ## All Phases
 
-- **Phase 1**: [Data Gathering and Transformation](https://github.com/KevinCarr42/CSAS-translation-finetuning-phase1) (complete)
+- **Phase 1**: [Data Gathering and Transformation](https://github.com/KevinCarr42/AI-Translation) (complete)
 - **Phase 2**: AI Translation Fine-Tuning (complete)
 - **Phase 3**: [Rule-Based Preferential Translations](https://github.com/KevinCarr42/rule-based-translation) (complete)
 - **Phase 4**: [AI Translation Quality Survey App](https://github.com/KevinCarr42/translation-quality-survey-app) (complete)
