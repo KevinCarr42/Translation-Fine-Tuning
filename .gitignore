@@ -11,3 +11,4 @@ outputs/*
 merged/*
 all_translations.json
 translation_matcher/
+backup/
