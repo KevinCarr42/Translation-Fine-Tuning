@@ -65,12 +65,16 @@ def add_features(dataframe):
     dataframe["clause_ratio"] = clauses_fr / clauses_en
     print(f"→ done in {(time.perf_counter() - t0)/60:.2f} min")
     print(f"TOTAL time: {(time.perf_counter() - t_total)/60:.2f} min")
+    print("Saving file...")
 
-    return df
+    return dataframe
 
 
 if __name__ == '__main__':
     print("reading dataframe")
-    df = pd.read_pickle("../create_training_data/matched_data_wo_linebreaks.pickle")
+    df = pd.read_pickle("../Data/matched_data_wo_linebreaks.pickle")
     df = add_features(df)
-    df.to_pickle("df_with_features.pickle")
+
+    df.to_pickle("../Data/df_with_features.pickle")
+    print("Done!")
+
