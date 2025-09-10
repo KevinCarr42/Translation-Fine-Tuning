@@ -77,25 +77,30 @@ def test_translations(dict_of_models, testing_data, n_samples=10, source_lang=No
         source_lang = d.get("source_lang")
         other_lang = "en" if source_lang == "fr" else "fr"
 
+        # TODO: remove after debug
         print(
             f"\n[sample {i}/{n_samples}] {language_codes[source_lang]}"
-            f"\n{f'text in ({language_codes[source_lang]}):':<{INDENT}}{source}"
-            f"\n{f'text out ({language_codes[other_lang]}), expected:':<{INDENT}}{target}"
         )
+        # # TODO: re-add after debug
+        # print(
+        #     f"\n[sample {i}/{n_samples}] {language_codes[source_lang]}"
+        #     f"\n{f'text in ({language_codes[source_lang]}):':<{INDENT}}{source}"
+        #     f"\n{f'text out ({language_codes[other_lang]}), expected:':<{INDENT}}{target}"
+        # )
 
         source_embedding = embedder.encode(source, convert_to_tensor=True)
         target_embedding = embedder.encode(target, convert_to_tensor=True)
         cos_sim_original = pytorch_cos_sim(source_embedding, target_embedding).item()
 
         for name, data in all_models.items():
-            preprocessed_text, token_mapping = preprocess_for_translation(source)
+            preprocessed_text, token_generator, translation_map = preprocess_for_translation(source, "all_translations.json")
 
             translated_text_with_tokens = data['translator'].translate_text(
                 preprocessed_text,
                 input_language=source_lang,
                 target_language=other_lang
             )
-            translated_text = postprocess_translation(translated_text_with_tokens, token_mapping)
+            translated_text = postprocess_translation(translated_text_with_tokens, token_generator, translation_map)
 
             translated_embedding = embedder.encode(translated_text, convert_to_tensor=True)
 
@@ -114,17 +119,26 @@ def test_translations(dict_of_models, testing_data, n_samples=10, source_lang=No
                 'cosine_similarity_vs_target': cos_sim_target,
             })
 
-            print(
-                f"{f'text out ({language_codes[other_lang]}), predicted with {name}:':<{INDENT}}{translated_text}"
-            )
+            # TODO: re-add after debug
+            # print(
+            #     f"{f'text out ({language_codes[other_lang]}), predicted with {name}:':<{INDENT}}{translated_text}"
+            # )
 
             # data['translator'].clear_cache()  # TODO only if out of memory
 
-        # if token_mapping:  # TODO remove after debugging the pre / post processing modules
-        #     print()
-        #     for x in ['preprocessing text', source, preprocessed_text, 'postprocessing text',
-        #               translated_text_with_tokens, translated_text]:
-        #         print(f'\t{x}')
+            # # TODO remove after debugging the pre / post processing modules
+            # if "PLACEHOLDERTOKEN" in translated_text:
+            #     print("======================================\n BAD: ======================================\n")
+            #     for x in ['preprocessing text', source, preprocessed_text, 'postprocessing text',
+            #               translated_text_with_tokens, translated_text]:
+            #         print(f'\t{x}')
+            #     print("======================================")
+
+        if translation_map:  # TODO remove after debugging the pre / post processing modules
+            print()
+            for x in ['preprocessing text', source, preprocessed_text, 'postprocessing text',
+                      translated_text_with_tokens, translated_text]:
+                print(f'\t{x}')
 
     with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
         fieldnames = [
@@ -186,6 +200,6 @@ if __name__ == "__main__":
         },
     }
 
-    n_tests = 10_000
+    n_tests = 100
     test_translations(all_models, testing_data, n_samples=n_tests, use_eval_split=False)
     test_translations(all_models, training_data, n_samples=n_tests, use_eval_split=True)

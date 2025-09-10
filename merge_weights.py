@@ -7,27 +7,27 @@ translation_models = {
     "m2m100_418m": {
         "base_model": "facebook/m2m100_418M",
         "lora_dir": "outputs/m2m100_418m/lora",
-        "out_dir": "merged/m2m100_418m"
+        "out_dir": "../Data/merged/m2m100_418m"
     },
     "mbart50_mmt_fr": {
         "base_model": "facebook/mbart-large-50-many-to-many-mmt",
         "lora_dir": "outputs/mbart50_mmt_fr/lora",
-        "out_dir": "merged/mbart50_mmt_fr"
+        "out_dir": "../Data/merged/mbart50_mmt_fr"
     },
     "mbart50_mmt_en": {
         "base_model": "facebook/mbart-large-50-many-to-many-mmt",
         "lora_dir": "outputs/mbart50_mmt_en/lora",
-        "out_dir": "merged/mbart50_mmt_en"
+        "out_dir": "../Data/merged/mbart50_mmt_en"
     },
     "opus_mt_en_fr": {
         "base_model": "Helsinki-NLP/opus-mt-tc-big-en-fr",
         "lora_dir": "outputs/opus_mt_en_fr/lora",
-        "out_dir": "merged/opus_mt_en_fr"
+        "out_dir": "../Data/merged/opus_mt_en_fr"
     },
     "opus_mt_fr_en": {
         "base_model": "Helsinki-NLP/opus-mt-tc-big-fr-en",
         "lora_dir": "outputs/opus_mt_fr_en/lora",
-        "out_dir": "merged/opus_mt_fr_en"
+        "out_dir": "../Data/merged/opus_mt_fr_en"
     },
 }
 
